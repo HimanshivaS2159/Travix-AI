@@ -4,10 +4,15 @@ import { AppLayout } from '../layouts/AppLayout';
 import { HomePage } from '../pages/HomePage';
 import { NotFoundPage } from '../pages/NotFoundPage';
 import DashboardPage from '../pages/DashboardPage';
+import LoginPage from '../pages/LoginPage';
 
 export const router = createBrowserRouter([
   {
     path: '/',
+    element: <LoginPage />,
+  },
+  {
+    path: '/home',
     element: <AppLayout />,
     children: [
       {
