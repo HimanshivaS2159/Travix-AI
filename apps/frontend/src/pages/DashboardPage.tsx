@@ -1,4 +1,6 @@
 import React, { useState } from 'react';
+import { useNavigate } from 'react-router-dom';
+import { LogOut } from 'lucide-react';
 import { ConversationPanel } from '../components/dashboard/ConversationPanel';
 import { ResultView } from '../components/dashboard/ResultView';
 import { SubagentsSidebar } from '../components/dashboard/SubagentsSidebar';
@@ -6,7 +8,17 @@ import { SubagentsSidebar } from '../components/dashboard/SubagentsSidebar';
 type ViewTab = 'trace' | 'flow' | 'result';
 
 export default function DashboardPage() {
+  const navigate = useNavigate();
   const [activeTab, setActiveTab] = useState<ViewTab>('result');
+
+  const handleLogout = () => {
+    // Clear any stored authentication data
+    localStorage.removeItem('authToken');
+    sessionStorage.clear();
+    
+    // Redirect to login page
+    navigate('/', { replace: true });
+  };
 
   return (
     <div className="flex h-screen bg-[#2a2a2a]">
@@ -14,15 +26,27 @@ export default function DashboardPage() {
       <div className="flex flex-1 flex-col">
         {/* Header */}
         <header className="bg-[#1e1e1e] border-b border-gray-700 px-6 py-3">
-          <div className="flex items-center gap-3">
-            <div className="flex items-center gap-2">
-              <div className="w-8 h-8 bg-gradient-to-br from-blue-500 via-purple-500 to-pink-500 rounded"></div>
-              <span className="text-white font-semibold text-lg">AgenticBox</span>
+          <div className="flex items-center justify-between">
+            <div className="flex items-center gap-3">
+              <div className="flex items-center gap-2">
+                <div className="w-8 h-8 bg-gradient-to-br from-blue-500 via-purple-500 to-pink-500 rounded"></div>
+                <span className="text-white font-semibold text-lg">AgenticBox</span>
+              </div>
+              <span className="text-gray-400">/</span>
+              <span className="text-gray-300">Admin</span>
+              <span className="text-gray-400">/</span>
+              <span className="text-gray-300">Travel & Expense</span>
             </div>
-            <span className="text-gray-400">/</span>
-            <span className="text-gray-300">Admin</span>
-            <span className="text-gray-400">/</span>
-            <span className="text-gray-300">Travel & Expense</span>
+
+            {/* Logout Button */}
+            <button
+              onClick={handleLogout}
+              className="flex items-center gap-2 px-4 py-2 bg-red-600 hover:bg-red-700 text-white rounded-lg transition-colors duration-200 font-medium text-sm"
+              title="Logout"
+            >
+              <LogOut size={18} />
+              <span>Logout</span>
+            </button>
           </div>
         </header>
 
