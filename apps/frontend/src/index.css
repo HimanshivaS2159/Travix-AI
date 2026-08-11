@@ -14,3 +14,32 @@
     -webkit-font-smoothing: antialiased;
   }
 }
+
+@layer components {
+  /* Dashboard specific styles */
+  .dashboard-scroll::-webkit-scrollbar {
+    width: 8px;
+  }
+  
+  .dashboard-scroll::-webkit-scrollbar-track {
+    background: transparent;
+  }
+  
+  .dashboard-scroll::-webkit-scrollbar-thumb {
+    background: rgba(156, 163, 175, 0.5);
+    border-radius: 4px;
+  }
+  
+  .dashboard-scroll::-webkit-scrollbar-thumb:hover {
+    background: rgba(156, 163, 175, 0.7);
+  }
+
+  /* Agent card hover effect */
+  .agent-card {
+    transition: all 0.2s ease-in-out;
+  }
+  
+  .agent-card:hover {
+    transform: translateY(-2px);
+  }
+}

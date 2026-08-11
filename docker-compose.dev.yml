@@ -1,0 +1,103 @@
+services:
+
+  backend:
+    build:
+      context: ./apps/backend
+      dockerfile: Dockerfile
+
+    ports:
+      - "8000:8000"
+
+    environment:
+      ENVIRONMENT: development
+      PORT: 8000
+
+    volumes:
+      - ./apps/backend/app:/app/app
+
+    command:
+      [
+        "uvicorn",
+        "app.main:app",
+        "--host",
+        "0.0.0.0",
+        "--port",
+        "8000",
+        "--reload"
+      ]
+
+    restart: unless-stopped
+
+    healthcheck:
+      test: ["CMD", "curl", "-f", "http://localhost:8000/health"]
+      interval: 30s
+      timeout: 10s
+      retries: 3
+
+  frontend:
+    build:
+      context: ./apps/frontend
+      dockerfile: Dockerfile.dev
+
+    ports:
+      - "3000:5173"
+
+    volumes:
+      - ./apps/frontend:/app
+      - /app/node_modules
+
+    environment:
+      NODE_ENV: development
+      CHOKIDAR_USEPOLLING: "true"
+
+    depends_on:
+      - backend
+
+    restart: unless-stopped
+
+  postgres:
+    image: postgres:16-alpine
+
+    container_name: travix-postgres
+
+    ports:
+      - "5432:5432"
+
+    environment:
+      POSTGRES_USER: travix
+      POSTGRES_PASSWORD: travix_password
+      POSTGRES_DB: travix_db
+
+    volumes:
+      - postgres_data:/var/lib/postgresql/data
+
+    restart: unless-stopped
+
+    healthcheck:
+      test: ["CMD-SHELL", "pg_isready -U travix -d travix_db"]
+      interval: 10s
+      timeout: 5s
+      retries: 5
+
+  redis:
+    image: redis:7-alpine
+
+    container_name: travix-redis
+
+    ports:
+      - "6379:6379"
+
+    volumes:
+      - redis_data:/data
+
+    restart: unless-stopped
+
+    healthcheck:
+      test: ["CMD", "redis-cli", "ping"]
+      interval: 10s
+      timeout: 5s
+      retries: 5
+
+volumes:
+  postgres_data:
+  redis_data:

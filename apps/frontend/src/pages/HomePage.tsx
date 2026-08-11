@@ -1,4 +1,6 @@
 import React from 'react';
+import { Link } from 'react-router-dom';
+import { Button } from '../components/ui/Button';
 
 export const HomePage: React.FC = () => {
   return (
@@ -9,6 +11,13 @@ export const HomePage: React.FC = () => {
       <p className="mt-3 text-lg text-slate-400 font-medium">
         Application Shell Ready
       </p>
+      <div className="mt-8">
+        <Link to="/dashboard">
+          <Button size="lg">
+            Go to Dashboard
+          </Button>
+        </Link>
+      </div>
     </div>
   );
 };
