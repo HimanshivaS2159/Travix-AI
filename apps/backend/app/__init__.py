@@ -1,0 +1,1 @@
+"""Travix AI Backend Application"""
