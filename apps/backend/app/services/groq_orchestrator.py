@@ -63,8 +63,8 @@ class GroqOrchestrator:
         ),
         "backoffice_agent": AgentDefinition(
             name="BackOffice Agent",
-            description="Manages accounts, traveler policy, and request policy",
-            capabilities=["account_management", "policy_configuration", "request_handling"],
+            description="Handles hotel search, booking, and booking history",
+            capabilities=["hotel_search", "hotel_booking", "booking_management"],
             icon="B"
         ),
     }
@@ -209,10 +209,9 @@ Agent names must be exactly: orchestrator, sbt_agent, expense_agent, or backoffi
                 "create_trip"
             ],
             "backoffice_agent": [
-                "manage_user_account",
-                "configure_policy",
-                "handle_requests",
-                "generate_reports"
+                "list_hotels",
+                "book_hotel",
+                "list_bookings"
             ]
         }
         return agent_tools.get(agent_name, [])

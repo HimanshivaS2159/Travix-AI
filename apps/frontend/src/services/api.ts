@@ -86,6 +86,16 @@ class APIService {
   }
 
   /**
+   * Execute user request through orchestrator and agent
+   */
+  async executeRequest(request: OrchestratorRequest): Promise<any> {
+    return this.request('/api/orchestrator/execute', {
+      method: 'POST',
+      body: JSON.stringify(request),
+    });
+  }
+
+  /**
    * Get list of available agents
    */
   async getAgents(): Promise<AgentsResponse> {
@@ -111,6 +121,47 @@ class APIService {
    */
   async healthCheck(): Promise<any> {
     return this.request('/health', {
+      method: 'GET',
+    });
+  }
+
+  /**
+   * Execute list_hotels tool
+   */
+  async listHotels(city: string): Promise<any> {
+    return this.request('/api/orchestrator/execute/list_hotels', {
+      method: 'POST',
+      body: JSON.stringify({ city }),
+    });
+  }
+
+  /**
+   * Execute book_hotel tool
+   */
+  async bookHotel(
+    city: string,
+    budget?: number,
+    roomType?: string,
+    checkIn?: string,
+    checkOut?: string
+  ): Promise<any> {
+    return this.request('/api/orchestrator/execute/book_hotel', {
+      method: 'POST',
+      body: JSON.stringify({
+        city,
+        budget,
+        room_type: roomType,
+        check_in: checkIn,
+        check_out: checkOut,
+      }),
+    });
+  }
+
+  /**
+   * Execute list_bookings tool
+   */
+  async listBookings(): Promise<any> {
+    return this.request('/api/orchestrator/execute/list_bookings', {
       method: 'GET',
     });
   }
