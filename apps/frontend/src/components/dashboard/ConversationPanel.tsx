@@ -1,5 +1,5 @@
 import React, { useState, useEffect, useRef } from 'react';
-import { useOrchestrator } from '../../hooks/useOrchestrator';
+import { useOrchestratorContext } from '../../contexts/OrchestratorContext';
 
 export function ConversationPanel() {
   const { 
@@ -8,7 +8,7 @@ export function ConversationPanel() {
     error, 
     sendMessage, 
     clearMessages 
-  } = useOrchestrator();
+  } = useOrchestratorContext();
   const [inputValue, setInputValue] = useState('');
   const messagesEndRef = useRef<HTMLDivElement>(null);
 

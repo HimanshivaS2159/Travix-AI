@@ -35,7 +35,7 @@ const agents: Agent[] = [
   {
     id: 'backoffice-agent',
     name: 'BackOffice Agent',
-    description: 'Manages accounts, traveler policy, and request policy',
+    description: 'Handles hotel search, booking, and booking history',
     color: 'bg-blue-600',
     icon: 'B',
   },

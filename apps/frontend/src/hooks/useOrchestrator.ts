@@ -5,6 +5,7 @@
 
 import { useState, useCallback, useRef } from 'react';
 import { apiService, OrchestratorResponse, AgentsResponse, OrchestratorRequest } from '../services/api';
+import { ToolResult, TraceEvent } from '../types';
 
 export interface Message {
   role: 'user' | 'assistant' | 'system';
@@ -21,6 +22,8 @@ interface UseOrchestratorReturn {
   error: string | null;
   agents: any;
   agentsLoading: boolean;
+  currentResult: ToolResult | null;
+  currentTrace: TraceEvent[];
   sendMessage: (message: string) => Promise<void>;
   loadAgents: () => Promise<void>;
   clearMessages: () => void;
@@ -33,6 +36,8 @@ export function useOrchestrator(): UseOrchestratorReturn {
   const [error, setError] = useState<string | null>(null);
   const [agents, setAgents] = useState<any>(null);
   const [agentsLoading, setAgentsLoading] = useState(false);
+  const [currentResult, setCurrentResult] = useState<ToolResult | null>(null);
+  const [currentTrace, setCurrentTrace] = useState<TraceEvent[]>([]);
   const conversationHistoryRef = useRef<Array<{ role: 'user' | 'assistant'; content: string }>>([]);
 
   /**
@@ -73,13 +78,13 @@ export function useOrchestrator(): UseOrchestratorReturn {
         content: userMessage,
       });
 
-      // Send to orchestrator
+      // Execute through unified endpoint
       const request: OrchestratorRequest = {
         user_message: userMessage,
         conversation_history: conversationHistoryRef.current,
       };
 
-      const response = await apiService.analyzeRequest(request);
+      const response = await apiService.executeRequest(request);
 
       // Add orchestrator response to messages
       const orchestratorMessage: Message = {
@@ -95,6 +100,27 @@ export function useOrchestrator(): UseOrchestratorReturn {
         role: 'assistant',
         content: response.reason,
       });
+
+      // Handle execution result
+      if (response.result) {
+        const result = response.result;
+        setCurrentResult(result);
+        setCurrentTrace(result.trace || []);
+
+        // Add result message to conversation
+        const resultMessage: Message = {
+          role: 'assistant',
+          content: result.message,
+          agent: response.agent,
+          action: result.action,
+          timestamp: new Date(),
+        };
+        setMessages(prev => [...prev, resultMessage]);
+      } else {
+        // No result - clear views
+        setCurrentResult(null);
+        setCurrentTrace([]);
+      }
     } catch (err) {
       const errorMessage = err instanceof Error ? err.message : 'Failed to process message';
       setError(errorMessage);
@@ -106,6 +132,8 @@ export function useOrchestrator(): UseOrchestratorReturn {
         timestamp: new Date(),
       };
       setMessages(prev => [...prev, errorMessageObj]);
+      setCurrentResult(null);
+      setCurrentTrace([]);
     } finally {
       setLoading(false);
     }
@@ -117,6 +145,8 @@ export function useOrchestrator(): UseOrchestratorReturn {
   const clearMessages = useCallback(() => {
     setMessages([]);
     conversationHistoryRef.current = [];
+    setCurrentResult(null);
+    setCurrentTrace([]);
   }, []);
 
   /**
@@ -132,6 +162,8 @@ export function useOrchestrator(): UseOrchestratorReturn {
     error,
     agents,
     agentsLoading,
+    currentResult,
+    currentTrace,
     sendMessage,
     loadAgents,
     clearMessages,
