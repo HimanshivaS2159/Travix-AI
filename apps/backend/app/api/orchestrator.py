@@ -12,6 +12,7 @@ from ..services.groq_orchestrator import (
     OrchestratorResponse
 )
 from ..services.backoffice_agent import BackOfficeAgent
+from ..services.sbt_agent import SBTAgent
 from ..services.itinerary_agent import ItineraryAgent
 from ..services.rebooking_agent import RebookingAgent
 from ..services.revising_agent import RevisingAgent
@@ -24,6 +25,7 @@ router = APIRouter(prefix="/api/orchestrator", tags=["orchestrator"])
 # Global agent instances
 _orchestrator_instance: Optional[GroqOrchestrator] = None
 _backoffice_agent_instance: Optional[BackOfficeAgent] = None
+_sbt_agent_instance: Optional[SBTAgent] = None
 _itinerary_agent_instance: Optional[ItineraryAgent] = None
 _rebooking_agent_instance: Optional[RebookingAgent] = None
 _revising_agent_instance: Optional[RevisingAgent] = None
@@ -56,6 +58,16 @@ def get_backoffice_agent() -> BackOfficeAgent:
         _backoffice_agent_instance = BackOfficeAgent()
     
     return _backoffice_agent_instance
+
+
+def get_sbt_agent() -> SBTAgent:
+    """Dependency to get SBT agent instance"""
+    global _sbt_agent_instance
+    
+    if _sbt_agent_instance is None:
+        _sbt_agent_instance = SBTAgent()
+    
+    return _sbt_agent_instance
 
 
 def get_itinerary_agent() -> ItineraryAgent:
@@ -130,6 +142,7 @@ async def execute_request(
     request: ExecuteRequest,
     orchestrator: GroqOrchestrator = Depends(get_orchestrator),
     backoffice_agent: BackOfficeAgent = Depends(get_backoffice_agent),
+    sbt_agent: SBTAgent = Depends(get_sbt_agent),
     itinerary_agent: ItineraryAgent = Depends(get_itinerary_agent),
     rebooking_agent: RebookingAgent = Depends(get_rebooking_agent),
     revising_agent: RevisingAgent = Depends(get_revising_agent)
@@ -160,6 +173,8 @@ async def execute_request(
         
         if routing.agent == "backoffice_agent":
             result = backoffice_agent.execute(request.user_message)
+        elif routing.agent == "sbt_agent":
+            result = sbt_agent.execute(request.user_message)
         elif routing.agent == "itinerary_agent":
             result = itinerary_agent.execute(request.user_message)
         elif routing.agent == "rebooking_agent":
@@ -317,3 +332,96 @@ async def execute_list_bookings(
     except Exception as e:
         logger.error(f"Error executing list_bookings: {e}")
         raise HTTPException(status_code=500, detail="Error listing bookings")
+
+
+# ==================== Flight Tool Endpoints ====================
+
+class SearchFlightsRequest(BaseModel):
+    """Request model for searching flights"""
+    from_city: str
+    to_city: str
+    date: Optional[str] = None
+
+
+class BookFlightRequest(BaseModel):
+    """Request model for booking flight"""
+    from_city: str
+    to_city: str
+    budget: Optional[int] = None
+    passenger_name: Optional[str] = "Test User"
+    class_type: Optional[str] = "Economy"
+
+
+@router.post("/execute/search_flights")
+async def execute_search_flights(
+    request: SearchFlightsRequest,
+    agent: SBTAgent = Depends(get_sbt_agent)
+) -> dict:
+    """
+    Execute search_flights tool
+    
+    Args:
+        request: Search parameters (from_city, to_city, date)
+        
+    Returns:
+        Tool result with flight list and trace
+    """
+    try:
+        logger.info(f"Executing search_flights from {request.from_city} to {request.to_city}")
+        result = agent.search_flights(
+            from_city=request.from_city,
+            to_city=request.to_city,
+            date=request.date
+        )
+        return result.model_dump()
+    except Exception as e:
+        logger.error(f"Error executing search_flights: {e}")
+        raise HTTPException(status_code=500, detail="Error searching flights")
+
+
+@router.post("/execute/book_flight")
+async def execute_book_flight(
+    request: BookFlightRequest,
+    agent: SBTAgent = Depends(get_sbt_agent)
+) -> dict:
+    """
+    Execute book_flight tool
+    
+    Args:
+        request: Booking details
+        
+    Returns:
+        Tool result with booking details and trace
+    """
+    try:
+        logger.info(f"Executing book_flight from {request.from_city} to {request.to_city}")
+        result = agent.book_flight(
+            from_city=request.from_city,
+            to_city=request.to_city,
+            budget=request.budget,
+            passenger_name=request.passenger_name,
+            class_type=request.class_type
+        )
+        return result.model_dump()
+    except Exception as e:
+        logger.error(f"Error executing book_flight: {e}")
+        raise HTTPException(status_code=500, detail="Error booking flight")
+
+
+@router.get("/execute/list_flight_bookings")
+async def execute_list_flight_bookings(
+    agent: SBTAgent = Depends(get_sbt_agent)
+) -> dict:
+    """
+    Execute list_flight_bookings tool
+    
+    Returns:
+        Tool result with flight bookings list and trace
+    """
+    try:
+        logger.info("Executing list_flight_bookings")
+        result = agent.list_flight_bookings()
+        return result.model_dump()
+    except Exception as e:
+        logger.error(f"Error executing list_flight_bookings: {e}")
+        raise HTTPException(status_code=500, detail="Error listing flight bookings")

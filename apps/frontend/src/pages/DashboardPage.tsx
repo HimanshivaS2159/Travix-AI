@@ -7,7 +7,9 @@ import { SubagentsSidebar } from '../components/dashboard/SubagentsSidebar';
 import { ScheduleForm } from '../components/dashboard/ScheduleForm';
 import { ShowSchedules } from '../components/dashboard/ShowSchedules';
 import { RebookingModal } from '../components/dashboard/RebookingModal';
+import { FlightBookingModal } from '../components/dashboard/FlightBookingModal';
 import { OrchestratorProvider, useOrchestratorContext } from '../contexts/OrchestratorContext';
+import type { Flight } from '../types';
 
 type ViewTab = 'trace' | 'flow' | 'result';
 
@@ -16,6 +18,8 @@ function DashboardContent() {
   const [activeTab, setActiveTab] = useState<ViewTab>('result');
   const { currentTrace, currentResult } = useOrchestratorContext();
   const [showRebookingModal, setShowRebookingModal] = useState(false);
+  const [showFlightBookingModal, setShowFlightBookingModal] = useState(false);
+  const [selectedFlight, setSelectedFlight] = useState<Flight | null>(null);
   const [schedules, setSchedules] = useState<any[]>([]);
 
   const handleLogout = () => {
@@ -49,6 +53,30 @@ function DashboardContent() {
   const handleRebookingAction = (action: string, data: any) => {
     console.log('Rebooking action:', action, data);
     setShowRebookingModal(false);
+  };
+
+  // Handle flight selection
+  const handleSelectFlight = (flight: Flight) => {
+    setSelectedFlight(flight);
+    setShowFlightBookingModal(true);
+  };
+
+  // Handle flight booking confirmation
+  const handleConfirmFlightBooking = async (passengerName: string, email: string) => {
+    try {
+      // Here you would call the backend API to book the flight
+      console.log('Booking flight:', selectedFlight, 'for', passengerName, email);
+      
+      // For now, just close the modal and show success
+      setShowFlightBookingModal(false);
+      setSelectedFlight(null);
+      
+      // You could trigger a new agent message to complete booking
+      alert(`Flight booked successfully for ${passengerName}!`);
+    } catch (error) {
+      console.error('Error booking flight:', error);
+      alert('Error booking flight. Please try again.');
+    }
   };
 
   // Determine which component to show based on current result action
@@ -175,7 +203,7 @@ function DashboardContent() {
               {activeTab === 'result' && (
                 <div className="space-y-4">
                   {renderActionComponent()}
-                  <ResultView />
+                  <ResultView onSelectFlight={handleSelectFlight} />
                 </div>
               )}
             </div>
@@ -185,6 +213,17 @@ function DashboardContent() {
 
       {/* Right Sidebar - Subagents & Tools */}
       <SubagentsSidebar />
+
+      {/* Flight Booking Modal */}
+      <FlightBookingModal
+        isOpen={showFlightBookingModal}
+        onClose={() => {
+          setShowFlightBookingModal(false);
+          setSelectedFlight(null);
+        }}
+        flight={selectedFlight}
+        onConfirmBooking={handleConfirmFlightBooking}
+      />
     </div>
   );
 }

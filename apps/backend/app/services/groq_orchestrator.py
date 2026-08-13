@@ -51,8 +51,8 @@ class GroqOrchestrator:
         ),
         "sbt_agent": AgentDefinition(
             name="SBT Agent",
-            description="Collects flight search route preference-aware guidance",
-            capabilities=["flight_search", "route_suggestions", "price_analysis"],
+            description="Collects flight search requirements and provides flight booking services",
+            capabilities=["flight_search", "flight_booking", "route_suggestions", "price_analysis"],
             icon="S"
         ),
         "expense_agent": AgentDefinition(
@@ -215,6 +215,8 @@ Agent names must be exactly one of: orchestrator, sbt_agent, expense_agent, back
             ],
             "sbt_agent": [
                 "search_flights",
+                "book_flight",
+                "list_flight_bookings",
                 "filter_routes",
                 "analyze_prices",
                 "suggest_alternatives"

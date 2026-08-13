@@ -1,9 +1,15 @@
 import React from 'react';
 import { useOrchestratorContext } from '../../contexts/OrchestratorContext';
-import { Hotel, Booking } from '../../types';
-import { Star, MapPin, Wifi, Coffee, Dumbbell, Waves } from 'lucide-react';
+import { Hotel, Booking, Flight, FlightBooking } from '../../types';
+import { Star, MapPin, Wifi, Coffee, Dumbbell, Waves, Plane } from 'lucide-react';
+import { FlightResultView } from './FlightResultView';
+import { ShowFlightBookings } from './ShowFlightBookings';
 
-export function ResultView() {
+interface ResultViewProps {
+  onSelectFlight?: (flight: Flight) => void;
+}
+
+export function ResultView({ onSelectFlight }: ResultViewProps) {
   const { currentResult } = useOrchestratorContext();
 
   if (!currentResult) {
@@ -31,7 +37,32 @@ export function ResultView() {
   }
 
   // Render based on action type
-  if (currentResult.action === 'list_hotels') {
+  if (currentResult.action === 'search_flights') {
+    const handleSelectFlight = (flight: Flight) => {
+      if (onSelectFlight) {
+        onSelectFlight(flight);
+      }
+    };
+
+    return (
+      <div className="p-6">
+        <FlightResultView
+          flights={currentResult.data?.flights || []}
+          from={currentResult.data?.from}
+          to={currentResult.data?.to}
+          onSelectFlight={handleSelectFlight}
+        />
+      </div>
+    );
+  } else if (currentResult.action === 'book_flight') {
+    return <FlightBookingConfirmationView booking={currentResult.data?.booking} message={currentResult.message} />;
+  } else if (currentResult.action === 'list_flight_bookings') {
+    return (
+      <div className="p-6">
+        <ShowFlightBookings bookings={currentResult.data?.bookings || []} />
+      </div>
+    );
+  } else if (currentResult.action === 'list_hotels') {
     return <HotelListView hotels={currentResult.data || []} message={currentResult.message} />;
   } else if (currentResult.action === 'book_hotel') {
     return <BookingConfirmationView booking={currentResult.data} message={currentResult.message} />;
@@ -291,6 +322,116 @@ function BookingsListView({ bookings, message }: { bookings: Booking[]; message:
           ))}
         </div>
       )}
+    </div>
+  );
+}
+
+// Flight Booking Confirmation View Component
+function FlightBookingConfirmationView({ booking, message }: { booking: FlightBooking | null; message: string }) {
+  if (!booking) {
+    return (
+      <div className="p-6">
+        <div className="bg-yellow-50 border border-yellow-200 rounded-lg p-4">
+          <p className="text-yellow-800">{message}</p>
+        </div>
+      </div>
+    );
+  }
+
+  return (
+    <div className="p-6">
+      <div className="max-w-2xl mx-auto">
+        <div className="bg-green-50 border border-green-200 rounded-lg p-4 mb-6">
+          <div className="flex items-center gap-2 mb-2">
+            <svg
+              className="w-6 h-6 text-green-600"
+              fill="none"
+              stroke="currentColor"
+              viewBox="0 0 24 24"
+            >
+              <path
+                strokeLinecap="round"
+                strokeLinejoin="round"
+                strokeWidth={2}
+                d="M5 13l4 4L19 7"
+              />
+            </svg>
+            <h2 className="text-lg font-semibold text-green-800">Flight Booked Successfully!</h2>
+          </div>
+          <p className="text-sm text-green-700">{message}</p>
+        </div>
+
+        <div className="bg-white rounded-lg shadow-md border border-gray-200 p-6">
+          <div className="mb-4 pb-4 border-b border-gray-200">
+            <div className="flex items-center gap-3 mb-2">
+              <div className="w-12 h-12 bg-gradient-to-br from-blue-500 to-blue-600 rounded-lg flex items-center justify-center">
+                <Plane className="w-6 h-6 text-white" />
+              </div>
+              <div>
+                <h3 className="text-xl font-bold text-gray-900">{booking.airline}</h3>
+                <p className="text-sm text-gray-600">{booking.flight_number}</p>
+              </div>
+            </div>
+          </div>
+
+          <div className="bg-gray-50 rounded-lg p-4 mb-4">
+            <div className="grid grid-cols-3 gap-4">
+              <div>
+                <p className="text-xs text-gray-500 mb-1">From</p>
+                <p className="font-semibold text-gray-900">{booking.from_city}</p>
+                <p className="text-sm text-gray-600">{booking.from_code}</p>
+                <p className="text-sm text-blue-600 mt-1">{booking.departure_time}</p>
+              </div>
+              <div className="flex flex-col items-center justify-center">
+                <Plane className="w-6 h-6 text-gray-400 mb-1" />
+                <p className="text-xs text-gray-500">{booking.duration}</p>
+              </div>
+              <div className="text-right">
+                <p className="text-xs text-gray-500 mb-1">To</p>
+                <p className="font-semibold text-gray-900">{booking.to_city}</p>
+                <p className="text-sm text-gray-600">{booking.to_code}</p>
+                <p className="text-sm text-blue-600 mt-1">{booking.arrival_time}</p>
+              </div>
+            </div>
+          </div>
+
+          <div className="grid grid-cols-2 gap-4 mb-4">
+            <div>
+              <div className="text-xs font-medium text-gray-500 mb-1">Passenger</div>
+              <div className="text-sm font-medium text-gray-900">{booking.passenger_name}</div>
+            </div>
+            <div>
+              <div className="text-xs font-medium text-gray-500 mb-1">Class</div>
+              <div className="text-sm font-medium text-gray-900">{booking.class_type}</div>
+            </div>
+            <div>
+              <div className="text-xs font-medium text-gray-500 mb-1">Booking Date</div>
+              <div className="text-sm font-medium text-gray-900">
+                {new Date(booking.booking_date).toLocaleDateString()}
+              </div>
+            </div>
+            <div>
+              <div className="text-xs font-medium text-gray-500 mb-1">Status</div>
+              <div className="text-sm font-medium text-green-600">{booking.status}</div>
+            </div>
+          </div>
+
+          <div className="pt-4 border-t border-gray-200">
+            <div className="flex items-center justify-between">
+              <div>
+                <div className="text-xs font-medium text-gray-500 mb-1">Total Price</div>
+                <div className="text-2xl font-bold text-gray-900">
+                  {booking.currency} {booking.price.toLocaleString()}
+                </div>
+              </div>
+              <div className="text-right">
+                <div className="text-xs font-medium text-gray-500 mb-1">Booking ID</div>
+                <div className="text-sm font-mono font-medium text-blue-600">{booking.booking_id}</div>
+              </div>
+            </div>
+          </div>
+        </div>
+      </div>
     </div>
   );
 }

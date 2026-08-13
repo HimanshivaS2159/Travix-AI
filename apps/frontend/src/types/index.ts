@@ -1,6 +1,47 @@
 export type ComponentVariant = 'default' | 'primary' | 'secondary' | 'outline' | 'ghost' | 'danger';
 export type ComponentSize = 'sm' | 'md' | 'lg';
 
+// Flight Types
+export interface Flight {
+  id: string;
+  airline: string;
+  flight_number: string;
+  from_city: string;
+  from_code: string;
+  to_city: string;
+  to_code: string;
+  departure_time: string;
+  arrival_time: string;
+  duration: string;
+  price: number;
+  currency: string;
+  class_type: string;
+  stops: number;
+  available_seats: number;
+  baggage: string;
+  amenities: string[];
+}
+
+export interface FlightBooking {
+  booking_id: string;
+  flight_id: string;
+  airline: string;
+  flight_number: string;
+  from_city: string;
+  from_code: string;
+  to_city: string;
+  to_code: string;
+  departure_time: string;
+  arrival_time: string;
+  duration: string;
+  price: number;
+  currency: string;
+  class_type: string;
+  passenger_name: string;
+  booking_date: string;
+  status: string;
+}
+
 // Hotel Types
 export interface Hotel {
   id: string;
