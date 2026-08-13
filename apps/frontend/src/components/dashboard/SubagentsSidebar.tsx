@@ -10,55 +10,206 @@ interface Agent {
   icon: string;
 }
 
+interface Tool {
+  id: string;
+  name: string;
+  agent: string;
+  description: string;
+  icon: string;
+}
+
 const agents: Agent[] = [
   {
     id: 'orchestrator',
     name: 'Orchestrator',
-    description: 'Routes users across flight and preference workflows',
+    description: 'Routes users across flight, hotel, and expense workflows',
     color: 'bg-blue-500',
     icon: 'O',
   },
   {
     id: 'sbt-agent',
     name: 'SBT Agent',
-    description: 'Collects flight search route preference-aware guidance',
+    description: 'Flight search, booking, and management',
     color: 'bg-cyan-500',
     icon: 'S',
   },
   {
     id: 'expense-agent',
     name: 'Expense Agent',
-    description: 'Handles trips, approvals, invoices and expense mutation tools',
+    description: 'Handles trips, approvals, invoices and expense tracking',
     color: 'bg-emerald-500',
     icon: 'E',
   },
   {
     id: 'backoffice-agent',
     name: 'BackOffice Agent',
-    description: 'Handles hotel search, booking, and booking history',
+    description: 'Hotel search, booking, and management',
     color: 'bg-blue-600',
     icon: 'B',
   },
   {
     id: 'itinerary-agent',
     name: 'Itinerary Agent',
-    description: 'Creates day-wise schedules and itineraries for trips',
+    description: 'Creates day-wise schedules and itineraries',
     color: 'bg-purple-500',
     icon: 'I',
   },
   {
     id: 'rebooking-agent',
     name: 'Rebooking Agent',
-    description: 'Handles flight/hotel cancellations, delays, and rebooking',
+    description: 'Handles cancellations, delays, and rebooking',
     color: 'bg-red-500',
     icon: 'R',
   },
   {
     id: 'revising-agent',
     name: 'Revising Agent',
-    description: 'Reviews and revises itineraries, optimizes schedules and budgets',
+    description: 'Reviews, optimizes schedules and budgets',
     color: 'bg-violet-500',
     icon: 'V',
+  },
+];
+
+const tools: Tool[] = [
+  // SBT Agent Tools
+  {
+    id: 'search_flights',
+    name: 'Search Flights',
+    agent: 'SBT Agent',
+    description: 'Search available flights between cities',
+    icon: '✈️',
+  },
+  {
+    id: 'book_flight',
+    name: 'Book Flight',
+    agent: 'SBT Agent',
+    description: 'Book a flight with passenger details',
+    icon: '🎫',
+  },
+  {
+    id: 'list_flight_bookings',
+    name: 'List Flight Bookings',
+    agent: 'SBT Agent',
+    description: 'View all flight booking history',
+    icon: '📋',
+  },
+  // BackOffice Agent Tools
+  {
+    id: 'list_hotels',
+    name: 'List Hotels',
+    agent: 'BackOffice Agent',
+    description: 'Search hotels in a city',
+    icon: '🏨',
+  },
+  {
+    id: 'book_hotel',
+    name: 'Book Hotel',
+    agent: 'BackOffice Agent',
+    description: 'Book a hotel room',
+    icon: '🛏️',
+  },
+  {
+    id: 'list_bookings',
+    name: 'List Hotel Bookings',
+    agent: 'BackOffice Agent',
+    description: 'View hotel booking history',
+    icon: '📝',
+  },
+  // Expense Agent Tools
+  {
+    id: 'create_expense',
+    name: 'Create Expense',
+    agent: 'Expense Agent',
+    description: 'Create a new expense entry',
+    icon: '💰',
+  },
+  {
+    id: 'approve_expense',
+    name: 'Approve Expense',
+    agent: 'Expense Agent',
+    description: 'Approve or reject expenses',
+    icon: '✅',
+  },
+  {
+    id: 'generate_invoice',
+    name: 'Generate Invoice',
+    agent: 'Expense Agent',
+    description: 'Create invoices for expenses',
+    icon: '🧾',
+  },
+  {
+    id: 'create_trip',
+    name: 'Create Trip',
+    agent: 'Expense Agent',
+    description: 'Create a new business trip',
+    icon: '🗺️',
+  },
+  // Itinerary Agent Tools
+  {
+    id: 'schedule_making_tool',
+    name: 'Create Schedule',
+    agent: 'Itinerary Agent',
+    description: 'Create day-wise itinerary',
+    icon: '📅',
+  },
+  {
+    id: 'show_schedule',
+    name: 'Show Schedules',
+    agent: 'Itinerary Agent',
+    description: 'View saved schedules',
+    icon: '📖',
+  },
+  // Rebooking Agent Tools
+  {
+    id: 'rebooking_tool',
+    name: 'Rebooking Tool',
+    agent: 'Rebooking Agent',
+    description: 'Handle rebooking requests',
+    icon: '🔄',
+  },
+  {
+    id: 'handle_cancellation',
+    name: 'Handle Cancellation',
+    agent: 'Rebooking Agent',
+    description: 'Process cancellations',
+    icon: '❌',
+  },
+  {
+    id: 'handle_delay',
+    name: 'Handle Delay',
+    agent: 'Rebooking Agent',
+    description: 'Manage flight/hotel delays',
+    icon: '⏰',
+  },
+  // Revising Agent Tools
+  {
+    id: 'review_itinerary',
+    name: 'Review Itinerary',
+    agent: 'Revising Agent',
+    description: 'Analyze and suggest improvements',
+    icon: '🔍',
+  },
+  {
+    id: 'optimize_schedule',
+    name: 'Optimize Schedule',
+    agent: 'Revising Agent',
+    description: 'Optimize travel schedules',
+    icon: '⚡',
+  },
+  {
+    id: 'check_budget',
+    name: 'Check Budget',
+    agent: 'Revising Agent',
+    description: 'Analyze budget breakdown',
+    icon: '💵',
+  },
+  // Orchestrator Tools
+  {
+    id: 'route_request',
+    name: 'Route Request',
+    agent: 'Orchestrator',
+    description: 'Intelligently route user requests',
+    icon: '🎯',
   },
 ];
 
@@ -70,6 +221,11 @@ export function SubagentsSidebar() {
     agent.name.toLowerCase().includes(searchQuery.toLowerCase())
   );
 
+  const filteredTools = tools.filter((tool) =>
+    tool.name.toLowerCase().includes(searchQuery.toLowerCase()) ||
+    tool.agent.toLowerCase().includes(searchQuery.toLowerCase())
+  );
+
   return (
     <div className="w-80 bg-[#f5f5f5] border-l border-gray-300 flex flex-col">
       {/* Header */}
@@ -78,7 +234,7 @@ export function SubagentsSidebar() {
           <h2 className="text-gray-800 text-sm font-semibold italic">
             Subagents & Tools
           </h2>
-          <span className="text-gray-500 text-xs">7 · 19</span>
+          <span className="text-gray-500 text-xs">{agents.length} · {tools.length}</span>
         </div>
 
         {/* Tab Navigation */}
@@ -198,7 +354,7 @@ export function SubagentsSidebar() {
 
         {/* Tools Section */}
         {(activeTab === 'all' || activeTab === 'tools') && (
-          <div className="p-4 border-t border-gray-300">
+          <div className={`p-4 ${activeTab === 'all' ? 'border-t border-gray-300' : ''}`}>
             <div className="flex items-center gap-2 mb-3">
               <svg
                 className="w-4 h-4 text-gray-600"
@@ -214,10 +370,44 @@ export function SubagentsSidebar() {
                 />
               </svg>
               <h3 className="text-xs font-semibold text-gray-700 uppercase tracking-wide">
-                Tools
+                Orchestrator Tools
               </h3>
+              <span className="ml-auto text-xs text-gray-500">{filteredTools.length}</span>
             </div>
-            <div className="text-xs text-gray-500 italic">19 tools available</div>
+
+            <div className="space-y-2">
+              {filteredTools.map((tool) => (
+                <div
+                  key={tool.id}
+                  className="bg-white rounded-lg p-3 shadow-sm border border-gray-200 hover:shadow-md cursor-pointer transition-shadow"
+                >
+                  <div className="flex items-start gap-3">
+                    {/* Tool Icon */}
+                    <div className="w-8 h-8 bg-gray-100 rounded-lg flex items-center justify-center flex-shrink-0 text-lg">
+                      {tool.icon}
+                    </div>
+
+                    {/* Tool Info */}
+                    <div className="flex-1 min-w-0">
+                      <div className="flex items-center justify-between mb-1">
+                        <h4 className="text-sm font-semibold text-gray-900">
+                          {tool.name}
+                        </h4>
+                      </div>
+                      <p className="text-xs text-gray-600 mb-1">
+                        {tool.description}
+                      </p>
+                      <div className="flex items-center gap-1">
+                        <span className="text-xs text-gray-500">by</span>
+                        <span className="text-xs font-medium text-blue-600">
+                          {tool.agent}
+                        </span>
+                      </div>
+                    </div>
+                  </div>
+                </div>
+              ))}
+            </div>
           </div>
         )}
       </div>
