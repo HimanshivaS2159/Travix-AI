@@ -12,16 +12,21 @@ from ..services.groq_orchestrator import (
     OrchestratorResponse
 )
 from ..services.backoffice_agent import BackOfficeAgent
+from ..services.itinerary_agent import ItineraryAgent
+from ..services.rebooking_agent import RebookingAgent
+from ..services.revising_agent import RevisingAgent
 from ..config import get_settings
 from pydantic import BaseModel
 
 logger = logging.getLogger(__name__)
 router = APIRouter(prefix="/api/orchestrator", tags=["orchestrator"])
 
-# Global orchestrator instance
+# Global agent instances
 _orchestrator_instance: Optional[GroqOrchestrator] = None
-# Global BackOffice agent instance
 _backoffice_agent_instance: Optional[BackOfficeAgent] = None
+_itinerary_agent_instance: Optional[ItineraryAgent] = None
+_rebooking_agent_instance: Optional[RebookingAgent] = None
+_revising_agent_instance: Optional[RevisingAgent] = None
 
 
 def get_orchestrator() -> GroqOrchestrator:
@@ -51,6 +56,36 @@ def get_backoffice_agent() -> BackOfficeAgent:
         _backoffice_agent_instance = BackOfficeAgent()
     
     return _backoffice_agent_instance
+
+
+def get_itinerary_agent() -> ItineraryAgent:
+    """Dependency to get Itinerary agent instance"""
+    global _itinerary_agent_instance
+    
+    if _itinerary_agent_instance is None:
+        _itinerary_agent_instance = ItineraryAgent()
+    
+    return _itinerary_agent_instance
+
+
+def get_rebooking_agent() -> RebookingAgent:
+    """Dependency to get Rebooking agent instance"""
+    global _rebooking_agent_instance
+    
+    if _rebooking_agent_instance is None:
+        _rebooking_agent_instance = RebookingAgent()
+    
+    return _rebooking_agent_instance
+
+
+def get_revising_agent() -> RevisingAgent:
+    """Dependency to get Revising agent instance"""
+    global _revising_agent_instance
+    
+    if _revising_agent_instance is None:
+        _revising_agent_instance = RevisingAgent()
+    
+    return _revising_agent_instance
 
 
 @router.post("/analyze", response_model=OrchestratorResponse)
@@ -94,7 +129,10 @@ class ExecuteRequest(BaseModel):
 async def execute_request(
     request: ExecuteRequest,
     orchestrator: GroqOrchestrator = Depends(get_orchestrator),
-    backoffice_agent: BackOfficeAgent = Depends(get_backoffice_agent)
+    backoffice_agent: BackOfficeAgent = Depends(get_backoffice_agent),
+    itinerary_agent: ItineraryAgent = Depends(get_itinerary_agent),
+    rebooking_agent: RebookingAgent = Depends(get_rebooking_agent),
+    revising_agent: RevisingAgent = Depends(get_revising_agent)
 ) -> dict:
     """
     Unified execution endpoint - routes and executes agent actions
@@ -118,19 +156,18 @@ async def execute_request(
         logger.info(f"Routed to {routing.agent}: {routing.action}")
         
         # Step 2: Execute based on routing
+        result = None
+        
         if routing.agent == "backoffice_agent":
-            # Execute through BackOffice Agent
             result = backoffice_agent.execute(request.user_message)
-            return {
-                "agent": routing.agent,
-                "action": result.action,
-                "confidence": routing.confidence,
-                "reason": routing.reason,
-                "result": result.model_dump()
-            }
+        elif routing.agent == "itinerary_agent":
+            result = itinerary_agent.execute(request.user_message)
+        elif routing.agent == "rebooking_agent":
+            result = rebooking_agent.execute(request.user_message)
+        elif routing.agent == "revising_agent":
+            result = revising_agent.execute(request.user_message)
         else:
-            # For other agents, return routing info only
-            # (SBT and Expense agents would be implemented here)
+            # For other agents not yet implemented
             return {
                 "agent": routing.agent,
                 "action": routing.action,
@@ -138,11 +175,21 @@ async def execute_request(
                 "reason": routing.reason,
                 "result": {
                     "action": routing.action,
-                    "message": f"Request routed to {routing.agent}. Agent execution not yet implemented for this agent.",
+                    "message": f"Request routed to {routing.agent}. Agent execution not yet implemented.",
                     "data": None,
-                    "trace": []
+                    "trace": [],
+                    "success": False
                 }
             }
+        
+        # Return unified response
+        return {
+            "agent": routing.agent,
+            "action": result.action,
+            "confidence": routing.confidence,
+            "reason": routing.reason,
+            "result": result.model_dump()
+        }
         
     except ValueError as e:
         raise HTTPException(status_code=400, detail=str(e))

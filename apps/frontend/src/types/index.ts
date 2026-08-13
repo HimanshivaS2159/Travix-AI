@@ -49,3 +49,42 @@ export interface ToolResult {
   data: any;
   trace: TraceEvent[];
 }
+
+// Schedule Types
+export interface ScheduleItem {
+  time: string;
+  activity: string;
+  location: string;
+  duration: string;
+  notes: string;
+}
+
+export interface DailySchedule {
+  day: number;
+  title: string;
+  items: ScheduleItem[];
+}
+
+export interface Schedule {
+  id: string;
+  trip_name: string;
+  city: string;
+  start_date: string;
+  end_date: string;
+  daily_schedules: DailySchedule[];
+  created_at: string;
+  status: string;
+}
+
+// Rebooking Types
+export interface Rebooking {
+  id: string;
+  type: 'flight_cancellation' | 'flight_delay' | 'hotel_cancellation';
+  status: string;
+  original_flight?: string;
+  original_booking?: string;
+  delay_hours?: number;
+  compensation?: string;
+  refund_amount?: string;
+  created_at: string;
+}

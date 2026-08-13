@@ -39,6 +39,27 @@ const agents: Agent[] = [
     color: 'bg-blue-600',
     icon: 'B',
   },
+  {
+    id: 'itinerary-agent',
+    name: 'Itinerary Agent',
+    description: 'Creates day-wise schedules and itineraries for trips',
+    color: 'bg-purple-500',
+    icon: 'I',
+  },
+  {
+    id: 'rebooking-agent',
+    name: 'Rebooking Agent',
+    description: 'Handles flight/hotel cancellations, delays, and rebooking',
+    color: 'bg-red-500',
+    icon: 'R',
+  },
+  {
+    id: 'revising-agent',
+    name: 'Revising Agent',
+    description: 'Reviews and revises itineraries, optimizes schedules and budgets',
+    color: 'bg-violet-500',
+    icon: 'V',
+  },
 ];
 
 export function SubagentsSidebar() {
@@ -57,7 +78,7 @@ export function SubagentsSidebar() {
           <h2 className="text-gray-800 text-sm font-semibold italic">
             Subagents & Tools
           </h2>
-          <span className="text-gray-500 text-xs">4 · 19</span>
+          <span className="text-gray-500 text-xs">7 · 19</span>
         </div>
 
         {/* Tab Navigation */}

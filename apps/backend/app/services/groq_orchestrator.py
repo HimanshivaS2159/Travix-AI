@@ -67,6 +67,24 @@ class GroqOrchestrator:
             capabilities=["hotel_search", "hotel_booking", "booking_management"],
             icon="B"
         ),
+        "itinerary_agent": AgentDefinition(
+            name="Itinerary Agent",
+            description="Creates day-wise schedules and itineraries for trips",
+            capabilities=["schedule_creation", "day_planning", "activity_scheduling"],
+            icon="I"
+        ),
+        "rebooking_agent": AgentDefinition(
+            name="Rebooking Agent",
+            description="Handles flight/hotel cancellations, delays, and rebooking",
+            capabilities=["flight_cancellation", "hotel_cancellation", "delay_handling", "rebooking"],
+            icon="R"
+        ),
+        "revising_agent": AgentDefinition(
+            name="Revising Agent",
+            description="Reviews and revises itineraries, optimizes schedules and budgets",
+            capabilities=["itinerary_review", "schedule_optimization", "budget_analysis"],
+            icon="V"
+        ),
     }
 
     def __init__(self, api_key: str, model: str = "llama-3.3-70b-versatile"):
@@ -103,7 +121,7 @@ IMPORTANT: You MUST respond with valid JSON only, no other text. Use this format
     "tools": ["tool1", "tool2"]
 }}
 
-Agent names must be exactly: orchestrator, sbt_agent, expense_agent, or backoffice_agent"""
+Agent names must be exactly one of: orchestrator, sbt_agent, expense_agent, backoffice_agent, itinerary_agent, rebooking_agent, revising_agent"""
 
     def analyze_request(self, request: OrchestratorRequest) -> OrchestratorResponse:
         """
@@ -141,7 +159,7 @@ Agent names must be exactly: orchestrator, sbt_agent, expense_agent, or backoffi
                     },
                     *messages
                 ],
-                temperature=0.3,  # Lower temperature for more consistent routing
+                temperature=0.3,
                 max_tokens=500,
                 top_p=0.9,
             )
@@ -212,6 +230,20 @@ Agent names must be exactly: orchestrator, sbt_agent, expense_agent, or backoffi
                 "list_hotels",
                 "book_hotel",
                 "list_bookings"
+            ],
+            "itinerary_agent": [
+                "schedule_making_tool",
+                "show_schedule"
+            ],
+            "rebooking_agent": [
+                "rebooking_tool",
+                "handle_cancellation",
+                "handle_delay"
+            ],
+            "revising_agent": [
+                "review_itinerary",
+                "optimize_schedule",
+                "check_budget"
             ]
         }
         return agent_tools.get(agent_name, [])

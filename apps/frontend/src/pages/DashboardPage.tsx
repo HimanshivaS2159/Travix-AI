@@ -4,6 +4,9 @@ import { LogOut } from 'lucide-react';
 import { ConversationPanel } from '../components/dashboard/ConversationPanel';
 import { ResultView } from '../components/dashboard/ResultView';
 import { SubagentsSidebar } from '../components/dashboard/SubagentsSidebar';
+import { ScheduleForm } from '../components/dashboard/ScheduleForm';
+import { ShowSchedules } from '../components/dashboard/ShowSchedules';
+import { RebookingModal } from '../components/dashboard/RebookingModal';
 import { OrchestratorProvider, useOrchestratorContext } from '../contexts/OrchestratorContext';
 
 type ViewTab = 'trace' | 'flow' | 'result';
@@ -12,6 +15,8 @@ function DashboardContent() {
   const navigate = useNavigate();
   const [activeTab, setActiveTab] = useState<ViewTab>('result');
   const { currentTrace, currentResult } = useOrchestratorContext();
+  const [showRebookingModal, setShowRebookingModal] = useState(false);
+  const [schedules, setSchedules] = useState<any[]>([]);
 
   const handleLogout = () => {
     // Clear any stored authentication data
@@ -20,6 +25,68 @@ function DashboardContent() {
     
     // Redirect to login page
     navigate('/', { replace: true });
+  };
+
+  // Handle schedule form submission
+  const handleScheduleSubmit = async (formData: any) => {
+    try {
+      // Save schedule to local state (in real app, would call backend API)
+      const newSchedule = {
+        ...formData,
+        id: `SCH-${Date.now()}`,
+        created_at: new Date().toISOString(),
+        status: 'active'
+      };
+      setSchedules([newSchedule, ...schedules]);
+      alert('Schedule saved successfully!');
+    } catch (error) {
+      console.error('Error saving schedule:', error);
+      alert('Error saving schedule');
+    }
+  };
+
+  // Handle rebooking action
+  const handleRebookingAction = (action: string, data: any) => {
+    console.log('Rebooking action:', action, data);
+    setShowRebookingModal(false);
+  };
+
+  // Determine which component to show based on current result action
+  const renderActionComponent = () => {
+    if (!currentResult) return null;
+
+    if (currentResult.action === 'schedule_making_tool') {
+      return <ScheduleForm onSubmit={handleScheduleSubmit} />;
+    }
+
+    if (currentResult.action === 'show_schedule') {
+      return <ShowSchedules schedules={schedules} />;
+    }
+
+    if (currentResult.action === 'rebooking_tool') {
+      return (
+        <div className="w-full">
+          <div className="bg-[#1e1e1e] rounded-lg border border-gray-700 p-6">
+            <h2 className="text-xl font-semibold text-white mb-4">Rebooking Request</h2>
+            <p className="text-gray-300 mb-6">{currentResult.message}</p>
+            <button
+              onClick={() => setShowRebookingModal(true)}
+              className="px-4 py-2 bg-blue-600 hover:bg-blue-700 text-white rounded-lg transition-colors"
+            >
+              View Rebooking Options
+            </button>
+          </div>
+          <RebookingModal
+            isOpen={showRebookingModal}
+            onClose={() => setShowRebookingModal(false)}
+            data={currentResult.data}
+            onAction={handleRebookingAction}
+          />
+        </div>
+      );
+    }
+
+    return null;
   };
 
   return (
@@ -102,10 +169,15 @@ function DashboardContent() {
             </div>
 
             {/* Tab Content */}
-            <div className="flex-1 overflow-auto dashboard-scroll">
+            <div className="flex-1 overflow-auto dashboard-scroll p-6">
               {activeTab === 'trace' && <TraceView trace={currentTrace} />}
               {activeTab === 'flow' && <FlowView trace={currentTrace} />}
-              {activeTab === 'result' && <ResultView />}
+              {activeTab === 'result' && (
+                <div className="space-y-4">
+                  {renderActionComponent()}
+                  <ResultView />
+                </div>
+              )}
             </div>
           </div>
         </div>
