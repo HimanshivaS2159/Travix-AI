@@ -127,7 +127,7 @@ function DashboardContent() {
             <div className="flex items-center gap-3">
               <div className="flex items-center gap-2">
                 <div className="w-8 h-8 bg-gradient-to-br from-blue-500 via-purple-500 to-pink-500 rounded"></div>
-                <span className="text-white font-semibold text-lg">AgenticBox</span>
+                <span className="text-white font-semibold text-lg">TRAVIX</span>
               </div>
               <span className="text-gray-400">/</span>
               <span className="text-gray-300">Admin</span>
