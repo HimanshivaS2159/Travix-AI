@@ -16,6 +16,7 @@ from ..services.sbt_agent import SBTAgent
 from ..services.itinerary_agent import ItineraryAgent
 from ..services.rebooking_agent import RebookingAgent
 from ..services.revising_agent import RevisingAgent
+from ..services.local_guide_agent import LocalGuideAgent
 from ..config import get_settings
 from pydantic import BaseModel
 
@@ -29,6 +30,7 @@ _sbt_agent_instance: Optional[SBTAgent] = None
 _itinerary_agent_instance: Optional[ItineraryAgent] = None
 _rebooking_agent_instance: Optional[RebookingAgent] = None
 _revising_agent_instance: Optional[RevisingAgent] = None
+_local_guide_agent_instance: Optional[LocalGuideAgent] = None
 
 
 def get_orchestrator() -> GroqOrchestrator:
@@ -100,6 +102,16 @@ def get_revising_agent() -> RevisingAgent:
     return _revising_agent_instance
 
 
+def get_local_guide_agent() -> LocalGuideAgent:
+    """Dependency to get Local Guide agent instance"""
+    global _local_guide_agent_instance
+    
+    if _local_guide_agent_instance is None:
+        _local_guide_agent_instance = LocalGuideAgent()
+    
+    return _local_guide_agent_instance
+
+
 @router.post("/analyze", response_model=OrchestratorResponse)
 async def analyze_request(
     request: OrchestratorRequest,
@@ -145,7 +157,8 @@ async def execute_request(
     sbt_agent: SBTAgent = Depends(get_sbt_agent),
     itinerary_agent: ItineraryAgent = Depends(get_itinerary_agent),
     rebooking_agent: RebookingAgent = Depends(get_rebooking_agent),
-    revising_agent: RevisingAgent = Depends(get_revising_agent)
+    revising_agent: RevisingAgent = Depends(get_revising_agent),
+    local_guide_agent: LocalGuideAgent = Depends(get_local_guide_agent)
 ) -> dict:
     """
     Unified execution endpoint - routes and executes agent actions
@@ -181,6 +194,8 @@ async def execute_request(
             result = rebooking_agent.execute(request.user_message)
         elif routing.agent == "revising_agent":
             result = revising_agent.execute(request.user_message)
+        elif routing.agent == "local_guide_agent":
+            result = local_guide_agent.execute(request.user_message)
         else:
             # For other agents not yet implemented
             return {
@@ -425,3 +440,47 @@ async def execute_list_flight_bookings(
     except Exception as e:
         logger.error(f"Error executing list_flight_bookings: {e}")
         raise HTTPException(status_code=500, detail="Error listing flight bookings")
+
+
+# ==================== Local Guide Tool Endpoints ====================
+
+class LocalGuideRequest(BaseModel):
+    """Request model for local guide"""
+    city: str
+    type: Optional[str] = "complete"  # attractions, restaurants, tips, gems, complete
+
+
+@router.post("/execute/local_guide")
+async def execute_local_guide(
+    request: LocalGuideRequest,
+    agent: LocalGuideAgent = Depends(get_local_guide_agent)
+) -> dict:
+    """
+    Execute local_guide tool
+    
+    Args:
+        request: City and guide type
+        
+    Returns:
+        Tool result with local recommendations and trace
+    """
+    try:
+        logger.info(f"Executing local_guide for {request.city} - {request.type}")
+        
+        # Build message based on type
+        if request.type == "attractions":
+            message = f"Show attractions in {request.city}"
+        elif request.type == "restaurants":
+            message = f"Show restaurants in {request.city}"
+        elif request.type == "tips":
+            message = f"Show travel tips for {request.city}"
+        elif request.type == "gems":
+            message = f"Show hidden gems in {request.city}"
+        else:
+            message = f"Complete local guide for {request.city}"
+        
+        result = agent.execute(message)
+        return result.model_dump()
+    except Exception as e:
+        logger.error(f"Error executing local_guide: {e}")
+        raise HTTPException(status_code=500, detail="Error getting local guide")

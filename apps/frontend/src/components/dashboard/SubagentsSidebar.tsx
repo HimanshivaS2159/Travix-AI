@@ -68,6 +68,13 @@ const agents: Agent[] = [
     color: 'bg-violet-500',
     icon: 'V',
   },
+  {
+    id: 'local-guide-agent',
+    name: 'Local Guide Agent',
+    description: 'Provides local recommendations, attractions, and travel tips',
+    color: 'bg-teal-500',
+    icon: 'L',
+  },
 ];
 
 const tools: Tool[] = [
@@ -202,6 +209,42 @@ const tools: Tool[] = [
     agent: 'Revising Agent',
     description: 'Analyze budget breakdown',
     icon: '💵',
+  },
+  // Local Guide Agent Tools
+  {
+    id: 'get_attractions',
+    name: 'Get Attractions',
+    agent: 'Local Guide Agent',
+    description: 'Find tourist attractions in a city',
+    icon: '🏛️',
+  },
+  {
+    id: 'get_restaurants',
+    name: 'Get Restaurants',
+    agent: 'Local Guide Agent',
+    description: 'Discover local food spots',
+    icon: '🍽️',
+  },
+  {
+    id: 'get_local_tips',
+    name: 'Get Travel Tips',
+    agent: 'Local Guide Agent',
+    description: 'Essential travel tips for a city',
+    icon: '💡',
+  },
+  {
+    id: 'get_hidden_gems',
+    name: 'Get Hidden Gems',
+    agent: 'Local Guide Agent',
+    description: 'Discover secret local spots',
+    icon: '💎',
+  },
+  {
+    id: 'get_complete_guide',
+    name: 'Complete Local Guide',
+    agent: 'Local Guide Agent',
+    description: 'Comprehensive city guide',
+    icon: '📍',
   },
   // Orchestrator Tools
   {

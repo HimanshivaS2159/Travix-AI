@@ -12,7 +12,7 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 #### ✨ Added
 
 **Backend**
-- Multi-agent system with 7 specialized agents
+- Multi-agent system with 8 specialized agents
 - Groq-powered LLM orchestration for intelligent routing
 - SBT Agent for flight booking with 27 flights across 8 routes
 - BackOffice Agent for hotel management with 20+ hotels
@@ -20,6 +20,7 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 - Itinerary Agent for day-wise schedule planning
 - Rebooking Agent for handling delays and cancellations
 - Revising Agent for itinerary optimization
+- **Local Guide Agent for attractions, restaurants, tips, and hidden gems**
 - RESTful API with FastAPI
 - Complete API documentation with Swagger UI
 - Trace event system for debugging agent workflows
@@ -52,6 +53,16 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 - Detailed hotel information (ratings, amenities, room types)
 - Hotel booking with date selection
 - Booking history tracking
+
+**Local Guide Agent**
+- **5+ tourist attractions per city** with ratings, entry fees, and best times to visit
+- **3-4 restaurant recommendations per city** with cuisines and must-try dishes
+- **5-7 essential travel tips per city** categorized by importance
+- **5 hidden gems per city** for off-the-beaten-path experiences
+- **Complete local guide** combining all recommendations
+- **4 supported cities**: Delhi, Mumbai, Dubai, Bangalore
+- Beautiful tabbed UI for browsing attractions, restaurants, tips, and gems
+- Integration with itinerary planning for seamless trip building
 
 **Developer Experience**
 - Comprehensive documentation

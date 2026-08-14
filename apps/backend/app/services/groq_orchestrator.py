@@ -85,6 +85,12 @@ class GroqOrchestrator:
             capabilities=["itinerary_review", "schedule_optimization", "budget_analysis"],
             icon="V"
         ),
+        "local_guide_agent": AgentDefinition(
+            name="Local Guide Agent",
+            description="Provides local recommendations, attractions, restaurants, and travel tips",
+            capabilities=["attractions", "restaurants", "local_tips", "hidden_gems", "complete_guide"],
+            icon="L"
+        ),
     }
 
     def __init__(self, api_key: str, model: str = "llama-3.3-70b-versatile"):
@@ -121,7 +127,7 @@ IMPORTANT: You MUST respond with valid JSON only, no other text. Use this format
     "tools": ["tool1", "tool2"]
 }}
 
-Agent names must be exactly one of: orchestrator, sbt_agent, expense_agent, backoffice_agent, itinerary_agent, rebooking_agent, revising_agent"""
+Agent names must be exactly one of: orchestrator, sbt_agent, expense_agent, backoffice_agent, itinerary_agent, rebooking_agent, revising_agent, local_guide_agent"""
 
     def analyze_request(self, request: OrchestratorRequest) -> OrchestratorResponse:
         """
@@ -246,6 +252,13 @@ Agent names must be exactly one of: orchestrator, sbt_agent, expense_agent, back
                 "review_itinerary",
                 "optimize_schedule",
                 "check_budget"
+            ],
+            "local_guide_agent": [
+                "get_attractions",
+                "get_restaurants",
+                "get_local_tips",
+                "get_hidden_gems",
+                "get_complete_guide"
             ]
         }
         return agent_tools.get(agent_name, [])

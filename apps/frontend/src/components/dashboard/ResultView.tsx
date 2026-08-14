@@ -4,6 +4,7 @@ import { Hotel, Booking, Flight, FlightBooking } from '../../types';
 import { Star, MapPin, Wifi, Coffee, Dumbbell, Waves, Plane } from 'lucide-react';
 import { FlightResultView } from './FlightResultView';
 import { ShowFlightBookings } from './ShowFlightBookings';
+import { LocalGuideView } from './LocalGuideView';
 
 interface ResultViewProps {
   onSelectFlight?: (flight: Flight) => void;
@@ -68,6 +69,14 @@ export function ResultView({ onSelectFlight }: ResultViewProps) {
     return <BookingConfirmationView booking={currentResult.data} message={currentResult.message} />;
   } else if (currentResult.action === 'list_bookings') {
     return <BookingsListView bookings={currentResult.data || []} message={currentResult.message} />;
+  } else if (
+    currentResult.action === 'get_attractions' ||
+    currentResult.action === 'get_restaurants' ||
+    currentResult.action === 'get_local_tips' ||
+    currentResult.action === 'get_hidden_gems' ||
+    currentResult.action === 'complete_local_guide'
+  ) {
+    return <LocalGuideView data={currentResult.data} message={currentResult.message} />;
   }
 
   return (

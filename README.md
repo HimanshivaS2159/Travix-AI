@@ -24,11 +24,12 @@ Travix-AI is a comprehensive travel management platform that leverages multiple 
 
 ### 🌟 Key Highlights
 
-- 🤖 **7 Specialized AI Agents** - Each agent is an expert in specific travel domains
+- 🤖 **8 Specialized AI Agents** - Each agent is an expert in specific travel domains
 - ✈️ **Smart Flight Booking** - Real-time flight search across 27+ routes
 - 🏨 **Hotel Reservations** - Intelligent hotel recommendations and booking
 - 💰 **Expense Management** - Track, approve, and manage travel expenses
 - 📅 **Itinerary Planning** - AI-powered day-wise schedule creation
+- 🗺️ **Local Guide** - Attractions, restaurants, tips, and hidden gems
 - 🔄 **Rebooking & Cancellations** - Handle flight delays and changes seamlessly
 - 📊 **Real-time Analytics** - Visual trace view of agent execution
 
@@ -86,6 +87,14 @@ Travix-AI is a comprehensive travel management platform that leverages multiple 
 - **Smart Optimization** - AI-powered schedule optimization
 - **Budget Analysis** - Real-time budget tracking
 
+### 🗺️ Local Guide Agent
+
+- **Tourist Attractions** - Curated attractions with ratings, fees, and tips
+- **Restaurant Recommendations** - Local cuisines with must-try dishes
+- **Travel Tips** - Transportation, safety, weather, and cultural advice
+- **Hidden Gems** - Off-the-beaten-path local favorites
+- **4 Major Cities** - Delhi, Mumbai, Dubai, Bangalore
+
 ### 🔄 Rebooking & Revisions
 
 - **Flight Delay Handling** - Automatic compensation calculation
@@ -120,9 +129,9 @@ Travix-AI is a comprehensive travel management platform that leverages multiple 
 │          (Intelligent Request Routing via LLM)           │
 └──────────────────┬──────────────────────────────────────┘
                    │
-       ┌───────────┼───────────┐
-       │           │           │
-       ▼           ▼           ▼
+       ┌───────────┼────────────┐
+       │           │            │
+       ▼           ▼            ▼
 ┌──────────┐ ┌──────────┐ ┌──────────┐
 │   SBT    │ │BackOffice│ │ Expense  │
 │  Agent   │ │  Agent   │ │  Agent   │
@@ -130,15 +139,15 @@ Travix-AI is a comprehensive travel management platform that leverages multiple 
 │ Flights  │ │  Hotels  │ │ Expenses │
 │ Booking  │ │ Bookings │ │  Trips   │
 └──────────┘ └──────────┘ └──────────┘
-       │           │           │
-       ▼           ▼           ▼
-┌──────────┐ ┌──────────┐ ┌──────────┐
-│Itinerary │ │Rebooking │ │ Revising │
-│  Agent   │ │  Agent   │ │  Agent   │
-├──────────┤ ├──────────┤ ├──────────┤
-│Schedules │ │ Delays   │ │ Analysis │
-│ Planning │ │Cancellat.│ │Optimizat.│
-└──────────┘ └──────────┘ └──────────┘
+       │           │            │
+       ▼           ▼            ▼
+┌──────────┐ ┌──────────┐ ┌──────────┐ ┌──────────┐
+│Itinerary │ │Rebooking │ │ Revising │ │  Local   │
+│  Agent   │ │  Agent   │ │  Agent   │ │  Guide   │
+├──────────┤ ├──────────┤ ├──────────┤ ├──────────┤
+│Schedules │ │ Delays   │ │ Analysis │ │Recommend.│
+│ Planning │ │Cancellat.│ │Optimizat.│ │Tips/Gems │
+└──────────┘ └──────────┘ └──────────┘ └──────────┘
 ```
 
 ### Agent Capabilities
@@ -152,6 +161,7 @@ Travix-AI is a comprehensive travel management platform that leverages multiple 
 | **Itinerary Agent** | Schedule planning | `schedule_making_tool`, `show_schedule` |
 | **Rebooking Agent** | Handle changes and delays | `rebooking_tool`, `handle_cancellation` |
 | **Revising Agent** | Optimize and analyze | `review_itinerary`, `optimize_schedule`, `check_budget` |
+| **Local Guide Agent** | Local recommendations | `get_attractions`, `get_restaurants`, `get_tips`, `get_gems` |
 
 ---
 
