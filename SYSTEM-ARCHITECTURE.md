@@ -1,585 +1,623 @@
-# System Architecture
+# 🏗️ System Architecture - Travix AI
 
-## 🏗️ High-Level Architecture
+## System Overview
 
 ```
 ┌─────────────────────────────────────────────────────────────────┐
-│                        Frontend (React 19)                       │
+│                         USER INTERFACE                          │
+│                     (React + TypeScript)                        │
 ├─────────────────────────────────────────────────────────────────┤
 │                                                                 │
-│  ┌──────────────────┐  ┌──────────────────┐  ┌──────────────┐  │
-│  │  ConversationPan │  │  ResultView      │  │  SubagentsSb │  │
-│  │  (Chat Input)    │  │  (3 New Display) │  │  (7 Agents)  │  │
-│  └────────┬─────────┘  └────────┬─────────┘  └──────────────┘  │
-│           │                     │                                │
-│  ┌────────▼──────────────────────▼──────────────────────────┐   │
-│  │         DashboardPage (Central State Manager)            │   │
-│  │  - schedules: Schedule[]                                 │   │
-│  │  - showRebookingModal: boolean                           │   │
-│  │  - currentResult: ToolResult                             │   │
-│  └──────────┬──────────────┬──────────────┬────────────────┘   │
-│             │              │              │                     │
-│   ┌─────────▼─────┐  ┌────▼────────┐  ┌─▼──────────────┐      │
-│   │ScheduleForm  │  │ShowSchedules│  │ RebookingModal │      │
-│   │ (NEW)        │  │ (NEW)       │  │ (NEW)          │      │
-│   └──────────────┘  └─────────────┘  └────────────────┘      │
+│  ┌──────────────┐  ┌──────────────┐  ┌──────────────┐        │
+│  │ Chat Panel   │  │ Result View  │  │ Subagents    │        │
+│  │ (Input)      │  │ (Display)    │  │ (Sidebar)    │        │
+│  └──────────────┘  └──────────────┘  └──────────────┘        │
 │                                                                 │
 └─────────────────────────────────────────────────────────────────┘
                               │
-                              │ HTTP/REST API
+                              │ Natural Language
+                              │ Commands
                               ▼
 ┌─────────────────────────────────────────────────────────────────┐
-│                    Backend (Python/FastAPI)                     │
+│                      API SERVICE LAYER                          │
+│                    (apiService.ts)                              │
 ├─────────────────────────────────────────────────────────────────┤
-│                                                                 │
-│  ┌────────────────────────────────────────────────────────┐    │
-│  │              Orchestrator Router (main.py)             │    │
-│  │  - Receives user message from frontend                │    │
-│  │  - Routes to Groq Orchestrator for analysis           │    │
-│  │  - Executes appropriate agent                         │    │
-│  │  - Returns result with trace events                   │    │
-│  └────────────────────┬─────────────────────────────────┘    │
-│                       │                                        │
-│  ┌────────────────────▼──────────────────────────────────┐    │
-│  │      Groq Orchestrator Service                        │    │
-│  │  - Analyzes user intent with LLM                      │    │
-│  │  - Returns: {agent, action, confidence}              │    │
-│  │  - Model: llama-3.3-70b-versatile                    │    │
-│  └────────────┬──────────┬──────────┬─────────────────┘    │
-│               │          │          │                       │
-│  ┌────────────▼─┐  ┌─────▼──────┐  ┌────────▼───────┐      │
-│  │ 4 Existing   │  │ 3 NEW      │  │ Other Agents   │      │
-│  │ Agents       │  │ Agents     │  │ (Orchestrator) │      │
-│  │              │  │            │  │                │      │
-│  │ - Orchestrat │  │- Itinerary │  └────────────────┘      │
-│  │ - SBT Agent  │  │- Rebooking │                          │
-│  │ - Expense Ag │  │- Revising  │                          │
-│  │ - BackOffice │  │            │                          │
-│  └──────────────┘  └────────────┘                          │
-│                                                                 │
-│  ┌────────────────────────────────────────────────────────┐    │
-│  │              In-Memory Storage (Dev)                   │    │
-│  │  - SCHEDULES: List[Schedule]                          │    │
-│  │  - REBOOKINGS: List[Rebooking]                        │    │
-│  │  (To be replaced with PostgreSQL in production)       │    │
-│  └────────────────────────────────────────────────────────┘    │
-│                                                                 │
+│  • executeRequest()     • saveExpense()                         │
+│  • analyzeRequest()     • saveTrip()                            │
+│  • listHotels()         • getExpenses()                         │
+│  • bookFlight()         • getTrips()                            │
 └─────────────────────────────────────────────────────────────────┘
                               │
-                              │ Groq API
+                              │ HTTP REST API
+                              │ (JSON)
                               ▼
-                    ┌──────────────────┐
-                    │   Groq LLM API   │
-                    │ (llama-3.3-70b)  │
-                    └──────────────────┘
+┌─────────────────────────────────────────────────────────────────┐
+│                    FASTAPI BACKEND                              │
+│                   (Python + FastAPI)                            │
+├─────────────────────────────────────────────────────────────────┤
+│                                                                 │
+│  ┌───────────────────────────────────────────────────────┐    │
+│  │           ORCHESTRATOR ENDPOINTS                       │    │
+│  │         (/api/orchestrator/*)                          │    │
+│  ├───────────────────────────────────────────────────────┤    │
+│  │  POST /execute          - Unified execution            │    │
+│  │  POST /analyze          - Intent analysis              │    │
+│  │  GET  /agents           - List agents                  │    │
+│  │  POST /execute/*        - Direct tool execution        │    │
+│  └───────────────────────────────────────────────────────┘    │
+│                              │                                  │
+│                              ▼                                  │
+│  ┌───────────────────────────────────────────────────────┐    │
+│  │           GROQ ORCHESTRATOR                            │    │
+│  │        (groq_orchestrator.py)                          │    │
+│  ├───────────────────────────────────────────────────────┤    │
+│  │  • Analyzes user intent with Groq AI                   │    │
+│  │  • Routes to appropriate agent                         │    │
+│  │  • Returns routing decision                            │    │
+│  │                                                         │    │
+│  │  Model: llama-3.1-70b-versatile                        │    │
+│  └───────────────────────────────────────────────────────┘    │
+│                              │                                  │
+│                              ▼                                  │
+│  ┌───────────────────────────────────────────────────────┐    │
+│  │                    AGENT LAYER                         │    │
+│  ├───────────────────────────────────────────────────────┤    │
+│  │                                                         │    │
+│  │  ┌──────────────────┐    ┌──────────────────┐        │    │
+│  │  │ BackOffice Agent │    │   SBT Agent      │        │    │
+│  │  │   (Hotels)       │    │   (Flights)      │        │    │
+│  │  └──────────────────┘    └──────────────────┘        │    │
+│  │                                                         │    │
+│  │  ┌──────────────────┐    ┌──────────────────┐        │    │
+│  │  │ LocalGuide Agent │    │ Expense Agent    │        │    │
+│  │  │  (Attractions)   │    │ (Expenses/Trips) │        │    │
+│  │  └──────────────────┘    └──────────────────┘        │    │
+│  │                                                         │    │
+│  │  ┌──────────────────┐    ┌──────────────────┐        │    │
+│  │  │ Itinerary Agent  │    │ Rebooking Agent  │        │    │
+│  │  │  (Schedules)     │    │  (Changes)       │        │    │
+│  │  └──────────────────┘    └──────────────────┘        │    │
+│  │                                                         │    │
+│  │  ┌──────────────────┐                                  │    │
+│  │  │  Revising Agent  │                                  │    │
+│  │  │  (Optimization)  │                                  │    │
+│  │  └──────────────────┘                                  │    │
+│  │                                                         │    │
+│  └───────────────────────────────────────────────────────┘    │
+│                              │                                  │
+│                              ▼                                  │
+│  ┌───────────────────────────────────────────────────────┐    │
+│  │              DATA STORAGE LAYER                        │    │
+│  ├───────────────────────────────────────────────────────┤    │
+│  │  EXPENSES = []     # In-memory array                   │    │
+│  │  TRIPS = []        # In-memory array                   │    │
+│  │  HOTELS = []       # In-memory array                   │    │
+│  │  FLIGHTS = []      # In-memory array                   │    │
+│  │  BOOKINGS = []     # In-memory array                   │    │
+│  │                                                         │    │
+│  │  (Future: PostgreSQL / MongoDB)                        │    │
+│  └───────────────────────────────────────────────────────┘    │
+│                                                                 │
+└─────────────────────────────────────────────────────────────────┘
 ```
 
 ---
 
-## 📊 Component Hierarchy
+## Component Architecture
 
-### Frontend Layer
-
-```
-App (React Router)
-│
-├── LoginPage
-│   └── Login UI
-│
-├── HomePage  
-│   └── Landing UI
-│
-└── DashboardPage (Main App)
-    │
-    ├── Header
-    │   ├── Logo/Title
-    │   └── Logout Button ✅
-    │
-    ├── Left Panel
-    │   └── ConversationPanel
-    │       ├── Message History
-    │       └── Input Box
-    │
-    ├── Center Panel (Tab View)
-    │   ├── Trace View
-    │   │   └── Event Timeline
-    │   │
-    │   ├── Flow View
-    │   │   └── Agent Flow Diagram
-    │   │
-    │   └── Result View
-    │       ├── ScheduleForm ✅ NEW
-    │       ├── ShowSchedules ✅ NEW
-    │       ├── RebookingModal ✅ NEW
-    │       └── Default ResultView
-    │
-    └── Right Sidebar
-        └── SubagentsSidebar
-            ├── 7 Agents ✅ (3 new)
-            └── 19 Tools
-```
-
-### Backend Layer
+### Frontend Component Tree
 
 ```
-FastAPI Application
-│
-├── API Routes (api/orchestrator.py)
-│   ├── POST /api/orchestrator/analyze
-│   ├── POST /api/schedules
-│   ├── GET /api/schedules
-│   ├── DELETE /api/schedules/{id}
-│   ├── POST /api/rebookings
-│   └── POST /api/analyze/*
-│
-├── Services (services/)
-│   ├── groq_orchestrator.py
-│   │   └── GroqOrchestrator class
-│   │       ├── analyze_request()
-│   │       ├── get_available_agents()
-│   │       └── get_tools_for_agent()
-│   │
-│   ├── itinerary_agent.py ✅ NEW
-│   │   └── ItineraryAgent class
-│   │       ├── execute()
-│   │       ├── create_schedule_form()
-│   │       ├── save_schedule()
-│   │       └── show_schedules()
-│   │
-│   ├── rebooking_agent.py ✅ NEW
-│   │   └── RebookingAgent class
-│   │       ├── execute()
-│   │       ├── handle_flight_delay()
-│   │       ├── handle_flight_cancellation()
-│   │       └── handle_hotel_cancellation()
-│   │
-│   ├── revising_agent.py ✅ NEW
-│   │   └── RevisingAgent class
-│   │       ├── execute()
-│   │       ├── review_itinerary()
-│   │       ├── optimize_schedule()
-│   │       └── check_budget()
-│   │
-│   └── [4 existing agents]
-│
-├── Models (config.py)
-│   ├── Pydantic models
-│   └── Settings/Config
-│
-└── Tests (tests/)
-    └── test_agents_integration.py ✅ NEW
+App.tsx
+└─ OrchestratorProvider (Context)
+   └─ Router
+      └─ DashboardPage
+         ├─ Navbar
+         ├─ SubagentsSidebar
+         │  └─ Agent Selection
+         ├─ ConversationPanel
+         │  ├─ Message List
+         │  └─ Input Field
+         └─ ResultView (Router)
+            ├─ HotelListView
+            ├─ FlightResultView
+            ├─ FlightBookingModal
+            ├─ ShowFlightBookings
+            ├─ LocalGuideView ✅
+            │  ├─ Attractions Tab
+            │  ├─ Restaurants Tab
+            │  ├─ Travel Tips Tab
+            │  └─ Hidden Gems Tab
+            ├─ ExpenseForm ✅
+            │  ├─ Core Details Section
+            │  ├─ Corporate Audit Section
+            │  └─ Receipt Upload Section
+            ├─ ShowExpenses ✅
+            │  ├─ Statistics Cards
+            │  └─ Expense Cards
+            ├─ TripForm ✅
+            │  └─ Trip Details
+            └─ ShowTrips ✅
+               ├─ Summary Cards
+               └─ Trip Cards
 ```
 
 ---
 
-## 🔄 Data Flow
+## Data Flow
 
-### Schedule Creation Flow
-
-```
-User Input: "Create a day wise schedule"
-    │
-    ▼
-ConversationPanel (Chat Input)
-    │
-    ▼
-OrchestratorContext.sendMessage()
-    │
-    ▼
-Backend API: POST /api/orchestrator/analyze
-    │
-    ▼
-Groq Orchestrator
-    ├─ Analyzes: "create" + "schedule" = itinerary_agent
-    ├─ Action: schedule_making_tool
-    └─ Returns: {agent: "itinerary_agent", action: "schedule_making_tool", confidence: 0.95}
-    │
-    ▼
-ItineraryAgent.execute()
-    │
-    ▼
-ItineraryAgent.create_schedule_form()
-    │
-    ▼
-Returns: ToolResult(action="schedule_making_tool", data={form_fields: [...]})
-    │
-    ▼
-Frontend Result View
-    │
-    ▼
-DashboardPage.renderActionComponent()
-    ├─ Checks: currentResult.action === "schedule_making_tool"
-    └─ Renders: <ScheduleForm onSubmit={handleScheduleSubmit} />
-    │
-    ▼
-User Fills Form
-    │
-    ▼
-ScheduleForm.handleSubmit()
-    │
-    ▼
-DashboardPage.handleScheduleSubmit()
-    │
-    ▼
-State Update: setSchedules([newSchedule, ...schedules])
-    │
-    ▼
-Alert: "Schedule saved successfully!" ✅
-```
-
-### Rebooking Flow
+### 1. Natural Language Query Flow
 
 ```
-User Input: "My flight is delayed 3 hours"
-    │
-    ▼
-Groq Orchestrator → rebooking_agent
-    │
-    ▼
-RebookingAgent.execute()
-    ├─ Detects: "delay" + "flight"
-    └─ Calls: handle_flight_delay()
-    │
-    ▼
-Analyzes Delay (3 hours)
-    │
-    ▼
-Returns: ToolResult(
-    action="rebooking_tool",
+User Types: "Create an expense"
+     │
+     ▼
+ConversationPanel.sendMessage()
+     │
+     ▼
+useOrchestrator.sendMessage()
+     │
+     ▼
+apiService.executeRequest({
+  user_message: "Create an expense",
+  conversation_history: [...]
+})
+     │
+     ▼
+POST /api/orchestrator/execute
+     │
+     ▼
+GroqOrchestrator.analyze_request()
+     │ (Groq AI analyzes intent)
+     ▼
+Routes to: expense_agent
+Action: create_expense
+     │
+     ▼
+ExpenseAgent.execute("Create an expense")
+     │
+     ▼
+ExpenseAgent.create_expense_form()
+     │
+     ▼
+Returns ToolResult {
+  action: "create_expense",
+  message: "Let's create an expense",
+  data: { form_type, fields, categories, ... },
+  success: true,
+  trace: [...]
+}
+     │
+     ▼
+Frontend receives result
+     │
+     ▼
+ResultView displays ExpenseForm
+     │
+     ▼
+User fills and submits form
+     │
+     ▼
+ExpenseForm.handleSubmit()
+     │
+     ▼
+apiService.saveExpense(expenseData)
+     │
+     ▼
+POST /api/orchestrator/execute/save_expense
+     │
+     ▼
+ExpenseAgent.save_expense(data)
+     │
+     ▼
+Saves to EXPENSES array
+Updates TRIPS[x].total_expenses
+     │
+     ▼
+Returns success confirmation
+     │
+     ▼
+Frontend shows ExpenseCreatedView
+     │
+     ▼
+Auto-refreshes with "Show my expenses"
+```
+
+---
+
+## Agent Communication Pattern
+
+### Standard Agent Interface
+
+```python
+class Agent:
+    def execute(self, user_message: str) -> ToolResult:
+        """
+        Main entry point for agent execution
+        
+        Args:
+            user_message: Natural language command
+            
+        Returns:
+            ToolResult with action, message, data, trace
+        """
+        # 1. Parse intent from message
+        intent = self._parse_intent(user_message)
+        
+        # 2. Execute appropriate tool
+        if intent == "create":
+            result = self._create_tool()
+        elif intent == "show":
+            result = self._show_tool()
+        # ...
+        
+        # 3. Return standardized result
+        return ToolResult(
+            action=action,
+            message=message,
+            data=data,
+            success=True,
+            trace=trace_events
+        )
+```
+
+### ToolResult Standard Format
+
+```python
+@dataclass
+class ToolResult:
+    action: str              # "create_expense", "show_trips", etc.
+    message: str             # Human-readable message
+    data: Dict[str, Any]    # Action-specific data
+    success: bool           # Operation success flag
+    trace: List[Dict]       # Execution trace events
+
+# Example:
+ToolResult(
+    action="expense_created",
+    message="✓ Expense 'EXP-2026-001' created successfully!",
     data={
-      delay_hours: 3,
-      compensation: "₹3,000",
-      options: [option1, option2, option3]
-    }
+        "expense": {...},
+        "total_expenses": 5
+    },
+    success=True,
+    trace=[
+        {"id": "trace-1", "type": "agent", "status": "completed", ...},
+        {"id": "trace-2", "type": "tool", "status": "completed", ...},
+        {"id": "trace-3", "type": "booking", "status": "completed", ...}
+    ]
 )
-    │
-    ▼
-Frontend Result View
-    │
-    ▼
-DashboardPage.renderActionComponent()
-    ├─ Checks: currentResult.action === "rebooking_tool"
-    └─ Renders: <RebookingModal />
-    │
-    ▼
-User Sees Modal
-    ├─ "Take delayed flight" 
-    ├─ "Rebook on next flight"
-    └─ "Cancel and get refund"
-    │
-    ▼
-User Selects Option
-    │
-    ▼
-RebookingModal.handleConfirm()
-    │
-    ▼
-DashboardPage.handleRebookingAction()
-    │
-    ▼
-Console Log + Close Modal ✅
 ```
 
 ---
 
-## 📦 Data Models
+## API Endpoint Structure
 
-### Frontend Types
+### Orchestrator Endpoints
 
-```typescript
-// Schedule
-type Schedule = {
-  id: string
-  trip_name: string
-  city: string
-  start_date: string
-  end_date: string
-  daily_schedules: DailySchedule[]
-  created_at: string
-  status: "active" | "archived"
-}
-
-// Daily Schedule
-type DailySchedule = {
-  day: number
-  title: string
-  items: ScheduleItem[]
-}
-
-// Schedule Item
-type ScheduleItem = {
-  time: string
-  activity: string
-  location: string
-  duration: string
-  notes?: string
-}
-
-// Rebooking
-type Rebooking = {
-  id: string
-  type: "flight_cancellation" | "flight_delay" | "hotel_cancellation"
-  status: string
-  [key: string]: any
-}
-
-// Tool Result
-type ToolResult = {
-  action: string
-  message: string
-  data: any
-  trace: TraceEvent[]
-}
-
-// Trace Event
-type TraceEvent = {
-  id: string
-  type: string
-  name: string
-  agent: string
-  status: string
-  output_summary: string
-  duration_ms: number
-  timestamp: string
-}
+```
+/api/orchestrator
+├─ POST /analyze              # Analyze intent only
+├─ POST /execute              # Analyze + execute
+├─ GET  /agents               # List available agents
+└─ GET  /agents/{name}/tools  # Get agent tools
 ```
 
-### Backend Models
+### Direct Execution Endpoints
+
+```
+/api/orchestrator/execute
+├─ Hotels
+│  ├─ POST /list_hotels
+│  ├─ POST /book_hotel
+│  └─ GET  /list_bookings
+│
+├─ Flights
+│  ├─ POST /search_flights
+│  ├─ POST /book_flight
+│  └─ GET  /list_flight_bookings
+│
+├─ Local Guide ✅
+│  └─ POST /local_guide
+│
+└─ Expenses & Trips ✅
+   ├─ POST /create_expense_form
+   ├─ POST /save_expense
+   ├─ GET  /show_expenses
+   ├─ POST /create_trip_form
+   ├─ POST /save_trip
+   ├─ GET  /show_trips
+   ├─ GET  /approve_expenses_form
+   └─ POST /approve_expense
+```
+
+---
+
+## State Management
+
+### Frontend State Architecture
+
+```
+OrchestratorContext
+├─ messages: Message[]
+├─ loading: boolean
+├─ error: string | null
+├─ currentResult: ToolResult | null
+├─ currentTrace: TraceEvent[]
+└─ agents: AgentInfo[]
+
+Component State (Local)
+├─ Form Data (e.g., expense, trip)
+├─ Validation Errors
+├─ Submit Loading State
+└─ Submit Error
+```
+
+### Backend State (In-Memory)
 
 ```python
-# Pydantic Models
-class ScheduleItem(BaseModel):
-    time: str
-    activity: str
-    location: str
-    duration: str
-    notes: str
-
-class DailySchedule(BaseModel):
-    day: int
-    title: str
-    items: List[ScheduleItem]
-
-class ToolResult(BaseModel):
-    action: str
-    message: str
-    data: Any
-    success: bool
-    trace: List[Dict] = []
-
-class RebookingRequest(BaseModel):
-    booking_id: str
-    reason: str
-    original_date: str
-    new_date: Optional[str] = None
-
-class OrchestratorRequest(BaseModel):
-    user_message: str
-    conversation_history: Optional[list] = None
-
-class OrchestratorResponse(BaseModel):
-    agent: str
-    action: str
-    confidence: float
-    reason: str
-    tools: Optional[list] = None
-```
-
----
-
-## 🔌 API Contract
-
-### Request/Response Pattern
-
-```
-REQUEST:
-{
-  "user_message": "create a day wise schedule",
-  "conversation_history": [...]  # optional
-}
-
-RESPONSE:
-{
-  "agent": "itinerary_agent",
-  "action": "schedule_making_tool",
-  "confidence": 0.95,
-  "reason": "User request matches schedule creation intent",
-  "tools": ["schedule_making_tool", "show_schedule"],
-  "trace": [
+# In expense_agent.py
+EXPENSES: List[Dict] = [
     {
-      "id": "trace-1",
-      "type": "agent",
-      "name": "itinerary_agent",
-      "status": "completed",
-      "output_summary": "Itinerary Agent processing started",
-      "duration_ms": 50
+        "expense_id": "EXP-2026-001",
+        "trip_id": "TRIP-001",
+        "amount": 15000,
+        ...
     }
-  ]
-}
+]
+
+TRIPS: List[Dict] = [
+    {
+        "trip_id": "TRIP-001",
+        "trip_name": "Mumbai Meeting",
+        "total_expenses": 15000,
+        ...
+    }
+]
 ```
 
 ---
 
-## 🗄️ Storage Architecture
+## Integration Points
 
-### Current (In-Memory)
+### 1. Groq AI Integration
 
 ```python
-# In itinerary_agent.py
-SCHEDULES: List[Dict] = []
+# In groq_orchestrator.py
+client = Groq(api_key=settings.groq_api_key)
 
-# In rebooking_agent.py
-REBOOKINGS: List[Dict] = []
+response = client.chat.completions.create(
+    model="llama-3.1-70b-versatile",
+    messages=[
+        {"role": "system", "content": SYSTEM_PROMPT},
+        {"role": "user", "content": user_message}
+    ],
+    temperature=0.3
+)
+
+# Parses response to determine agent routing
 ```
 
-### Future (PostgreSQL)
+### 2. Frontend-Backend Integration
 
-```sql
--- Schedules Table
-CREATE TABLE schedules (
-  id VARCHAR(50) PRIMARY KEY,
-  trip_name VARCHAR(255),
-  city VARCHAR(100),
-  start_date DATE,
-  end_date DATE,
-  daily_schedules JSONB,
-  created_at TIMESTAMP,
-  user_id VARCHAR(50),
-  FOREIGN KEY (user_id) REFERENCES users(id)
-);
-
--- Rebookings Table
-CREATE TABLE rebookings (
-  id VARCHAR(50) PRIMARY KEY,
-  booking_id VARCHAR(100),
-  type VARCHAR(50),
-  status VARCHAR(50),
-  data JSONB,
-  created_at TIMESTAMP,
-  user_id VARCHAR(50),
-  FOREIGN KEY (user_id) REFERENCES users(id)
-);
-```
-
----
-
-## 🔐 Security Layer
-
-### Current Auth (Placeholder)
 ```typescript
-// src/pages/LoginPage.tsx
-// Basic login with redirect to dashboard
-
-// Logout functionality
-handleLogout() {
-  localStorage.removeItem('authToken')
-  sessionStorage.clear()
-  navigate('/')
+// In api.ts
+class APIService {
+  private baseURL = 'http://localhost:8000';
+  
+  async executeRequest(request: OrchestratorRequest) {
+    const response = await fetch(
+      `${this.baseURL}/api/orchestrator/execute`,
+      {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify(request)
+      }
+    );
+    return response.json();
+  }
 }
 ```
 
-### Future Auth (To Implement)
-```python
-# Backend
-class AuthService:
-  - verify_token(token)
-  - get_user_from_token(token)
-  - validate_user_access(user_id, resource_id)
+### 3. Agent-Data Integration
 
-# Frontend
-class AuthService:
-  - getToken()
-  - setToken(token)
-  - isAuthenticated()
-  - logout()
+```python
+# In expense_agent.py
+def save_expense(self, expense_data: Dict) -> ToolResult:
+    # Create expense
+    expense = {...}
+    
+    # Link to trip if specified
+    if expense_data.get("associated_trip"):
+        for trip in self.trips:
+            if trip["trip_name"] == expense_data["associated_trip"]:
+                expense["trip_id"] = trip["trip_id"]
+                trip["total_expenses"] += expense["amount"]
+    
+    # Save to storage
+    self.expenses.insert(0, expense)
+    
+    return ToolResult(...)
 ```
 
 ---
 
-## 🎯 Deployment Architecture
+## Security Architecture (Future)
+
+```
+┌─────────────────────────────────────────────────┐
+│          AUTHENTICATION LAYER (Future)          │
+├─────────────────────────────────────────────────┤
+│  • JWT Token Authentication                     │
+│  • Session Management                           │
+│  • Role-Based Access Control (RBAC)             │
+└─────────────────────────────────────────────────┘
+                    │
+                    ▼
+┌─────────────────────────────────────────────────┐
+│          AUTHORIZATION MIDDLEWARE               │
+├─────────────────────────────────────────────────┤
+│  • Verify JWT Token                             │
+│  • Check User Permissions                       │
+│  • Rate Limiting                                │
+└─────────────────────────────────────────────────┘
+                    │
+                    ▼
+           Current API Layer
+```
+
+---
+
+## Deployment Architecture (Future)
+
+```
+┌──────────────────────────────────────────────────────┐
+│                   PRODUCTION                         │
+├──────────────────────────────────────────────────────┤
+│                                                      │
+│  ┌─────────────┐        ┌─────────────┐            │
+│  │   Nginx     │───────▶│   React     │            │
+│  │  (Reverse   │        │   (Build)   │            │
+│  │   Proxy)    │        └─────────────┘            │
+│  └─────────────┘                                    │
+│         │                                            │
+│         │                                            │
+│         ▼                                            │
+│  ┌─────────────┐        ┌─────────────┐            │
+│  │   Gunicorn  │───────▶│  FastAPI    │            │
+│  │   (WSGI)    │        │   Backend   │            │
+│  └─────────────┘        └─────────────┘            │
+│         │                      │                     │
+│         │                      │                     │
+│         ▼                      ▼                     │
+│  ┌─────────────┐        ┌─────────────┐            │
+│  │ PostgreSQL  │        │    Redis    │            │
+│  │  Database   │        │    Cache    │            │
+│  └─────────────┘        └─────────────┘            │
+│                                                      │
+└──────────────────────────────────────────────────────┘
+```
+
+---
+
+## Technology Stack
+
+### Frontend
+- **Framework**: React 18
+- **Language**: TypeScript
+- **Styling**: Tailwind CSS
+- **Icons**: Lucide React
+- **HTTP Client**: Fetch API
+- **State**: React Context + Hooks
+- **Build**: Vite
+- **Routing**: React Router
+
+### Backend
+- **Framework**: FastAPI
+- **Language**: Python 3.11
+- **AI**: Groq API (Llama 3.1)
+- **Validation**: Pydantic
+- **CORS**: fastapi.middleware.cors
+- **Logging**: Python logging
+- **Testing**: pytest
 
 ### Development
+- **Version Control**: Git
+- **Package Managers**: npm, pip
+- **Development Server**: Vite Dev Server, Uvicorn
+- **Hot Reload**: Both frontend and backend
+
+---
+
+## Performance Considerations
+
+### Current Performance
+- ✅ Fast in-memory data access
+- ✅ Minimal API latency
+- ✅ Quick UI rendering
+- ✅ Efficient state management
+
+### Future Optimizations
+- ⏳ Database indexing
+- ⏳ API response caching
+- ⏳ Frontend code splitting
+- ⏳ Image optimization
+- ⏳ Lazy loading
+- ⏳ CDN for static assets
+
+---
+
+## Scalability Path
+
+### Current (Development)
 ```
-Local Machine
-├── Frontend: npm run dev (port 5173)
-├── Backend: uvicorn main:app --reload (port 8000)
-└── Docker Compose: docker-compose.dev.yml
+Single Server
+├─ Frontend (Vite Dev)
+├─ Backend (Uvicorn)
+└─ In-Memory Storage
 ```
 
-### Production
+### Future (Production)
 ```
-Cloud Platform (e.g., AWS, GCP, Azure)
-├── Frontend
-│   ├── S3 + CloudFront (static hosting)
-│   └── CDN cache
-│
-├── Backend
-│   ├── ECS/GKE (containerized)
-│   ├── Load Balancer
-│   └── Auto-scaling
-│
-└── Database
-    └── PostgreSQL RDS/Cloud SQL
+Load Balancer
+├─ Frontend Servers (Multiple)
+├─ Backend Servers (Multiple)
+├─ Database Cluster (Primary + Replicas)
+├─ Cache Layer (Redis Cluster)
+└─ File Storage (S3/Cloud Storage)
 ```
 
 ---
 
-## 📈 Scaling Considerations
+## Monitoring & Logging (Future)
 
-### Horizontal Scaling
-- Stateless backend services
-- Multiple FastAPI instances
-- Shared database
-
-### Vertical Scaling
-- Optimize agent algorithms
-- Cache frequently used data
-- Database indexing
-
-### Caching Strategy
-- Schedule display (1 hour TTL)
-- Agent capabilities (24 hour TTL)
-- Session data (real-time)
-
----
-
-## 🚀 Performance Metrics
-
-### Target Response Times
-- Chat message processing: < 2s
-- Schedule save: < 1s
-- Display schedules: < 500ms
-- Rebooking options: < 1.5s
-
-### Scalability Targets
-- Concurrent users: 10,000+
-- Schedules stored: 1,000,000+
-- Daily requests: 1,000,000+
+```
+┌─────────────────────────────────────────┐
+│         Application Logs                │
+│  • API requests/responses               │
+│  • Error traces                         │
+│  • Performance metrics                  │
+└─────────────────────────────────────────┘
+              │
+              ▼
+┌─────────────────────────────────────────┐
+│      Logging Service                    │
+│  • ELK Stack / CloudWatch               │
+│  • Log aggregation                      │
+│  • Real-time alerts                     │
+└─────────────────────────────────────────┘
+              │
+              ▼
+┌─────────────────────────────────────────┐
+│      Monitoring Dashboard               │
+│  • Grafana / DataDog                    │
+│  • Uptime monitoring                    │
+│  • Performance metrics                  │
+└─────────────────────────────────────────┘
+```
 
 ---
 
-## ✅ Architecture Benefits
+## Summary
 
-1. **Separation of Concerns**: Each agent handles one domain
-2. **Extensibility**: Easy to add new agents
-3. **Type Safety**: Full TypeScript + Pydantic
-4. **Testability**: Independent agent testing
-5. **Maintainability**: Clear structure and documentation
-6. **Scalability**: Stateless services, persistent storage
-7. **Security**: Ready for authentication layer
-8. **Monitoring**: Comprehensive trace events
+**Architecture Type**: Microservices-oriented with agent-based routing
+
+**Communication**: RESTful API with JSON
+
+**State Management**: Context API (frontend), In-memory (backend)
+
+**AI Integration**: Groq API for natural language understanding
+
+**Deployment**: Development (single server), Production (distributed)
+
+**Scalability**: Horizontal scaling ready with stateless design
+
+**Security**: Token-based auth ready, HTTPS for production
+
+**Monitoring**: Logging infrastructure ready for integration
 
 ---
 
-## 📊 System Capacity
-
-| Component | Capacity | Notes |
-|-----------|----------|-------|
-| Schedules | 1M+ | In-memory: 100K |
-| Rebookings | 10M+ | In-memory: 100K |
-| Concurrent Users | 10K+ | Current: depends on server |
-| API Calls/Day | 1M+ | Current: unlimited |
-| Response Time | <2s | Average: 500ms |
-| Uptime | 99.9% | Target for production |
-
-This architecture is production-ready and can scale to enterprise levels with appropriate infrastructure.
+**Last Updated**: August 14, 2026  
+**Version**: 1.0.0  
+**Status**: Architecture Documented

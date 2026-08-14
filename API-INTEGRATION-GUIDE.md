@@ -1,10 +1,422 @@
 # API Integration Guide
 
-## 🔌 Backend API Endpoints (To Be Implemented)
+## ✅ COMPLETED FEATURES
 
-All endpoints should return the standard response format with trace events and action data.
+### 1. Local Guide Agent
+**Status**: ✅ Fully Implemented & Working
+
+**Backend** (`apps/backend/app/services/local_guide_agent.py`):
+- 12 attractions across 4 cities (Delhi, Mumbai, Dubai, Bangalore)
+- 11 restaurants with ratings and cuisine types
+- 21 travel tips for safe and enjoyable travel
+- 20 hidden gems for authentic experiences
+- Integrated with Groq orchestrator
+
+**Frontend** (`apps/frontend/src/components/dashboard/LocalGuideView.tsx`):
+- Clean white card design with 4 tabs
+- Tabs: Attractions, Restaurants, Travel Tips, Hidden Gems
+- Interactive cards with images, ratings, and details
+- Responsive grid layout
+
+**Natural Language Commands**:
+- "Show attractions in Delhi"
+- "Show restaurants in Mumbai"
+- "Give me travel tips for Dubai"
+- "Show hidden gems in Bangalore"
+- "Complete local guide for Delhi"
+
+---
+
+### 2. Expense Management System
+**Status**: ✅ Fully Implemented & Working
+
+**Backend** (`apps/backend/app/services/expense_agent.py`):
+- Complete CRUD operations for expenses
+- 10 expense categories (Flight, Hotel, Food, Transportation, etc.)
+- 5 payment methods (Corporate Card, Personal Card, Cash, UPI, Bank Transfer)
+- GST/Tax amount support
+- Policy compliance tracking
+- Status workflow (pending, approved, rejected)
+- Trip-expense linking
+- Statistics calculation (total amount, pending, approved, average)
+
+**Frontend Components**:
+- `ExpenseForm.tsx` - Cream/beige background theme, 3 sections:
+  - Expense Core Details (ID, Date, Category, Merchant, Amount, Currency)
+  - Corporate Audit & Policy (Associated Trip, Payment Method, GST, Notes)
+  - Receipt & Invoice Upload (Drag & drop, OCR Ready badge)
+- `ShowExpenses.tsx` - Statistics dashboard with expense cards
+- Connected to backend API with proper error handling and loading states
+
+**API Endpoints**:
+```
+POST /api/orchestrator/execute/save_expense
+GET  /api/orchestrator/execute/show_expenses
+```
+
+**Natural Language Commands**:
+- "Create an expense"
+- "Show my expenses"
+- "List all expenses"
+
+---
+
+### 3. Trip Management System
+**Status**: ✅ Fully Implemented & Working
+
+**Backend** (`apps/backend/app/services/expense_agent.py`):
+- Trip creation with complete details
+- Trip status tracking (active, completed, cancelled)
+- Automatic expense totals calculation
+- Trip-expense association
+- Duration calculation
+
+**Frontend Components**:
+- `TripForm.tsx` - Matching cream/beige theme with fields:
+  - Trip Name
+  - Start Date & End Date
+  - Destination
+  - Business Purpose
+  - Info box explaining benefits
+- `ShowTrips.tsx` - Summary cards and detailed trip cards with:
+  - Gradient summary cards (Total Trips, Active Trips, Total Expenses)
+  - Trip cards with status badges
+  - Auto-calculated duration
+  - Icons for dates, destination, purpose
+  - Linked expenses display
+- Connected to backend API with proper error handling and loading states
+
+**API Endpoints**:
+```
+POST /api/orchestrator/execute/save_trip
+GET  /api/orchestrator/execute/show_trips
+```
+
+**Natural Language Commands**:
+- "Create a trip"
+- "Create a business trip"
+- "Show my trips"
+- "List all trips"
+
+---
+
+## 🎨 Design Theme
+
+All components follow the same professional theme from screenshots:
+
+- **Background**: Cream/beige (#F5F3EF)
+- **Cards**: White (bg-white) with borders
+- **Headers**: Professional with navigation breadcrumbs
+- **Buttons**: Blue primary, white secondary
+- **Icons**: Colorful icon boxes (blue, green, purple)
+- **Layout**: Two-column grid for forms
+- **Typography**: Clean, professional hierarchy
+
+---
+
+## 🔄 Complete Integration Flow
+
+### User Journey Example: Creating an Expense with Trip
+
+1. **User**: "Create a trip"
+   - Groq Orchestrator routes to `expense_agent`
+   - Returns `create_trip` action
+   - Frontend shows TripForm
+
+2. **User fills trip form**:
+   - Trip Name: "Mumbai Client Meeting • August 2026"
+   - Dates: Aug 14-16, 2026
+   - Destination: Mumbai, India
+   - Purpose: "Quarterly business review with key clients"
+
+3. **User submits**: 
+   - Frontend calls `apiService.saveTrip()`
+   - Backend saves to TRIPS array
+   - Returns trip_id: "TRIP-001"
+   - Frontend shows TripCreatedView confirmation
+   - Auto-refreshes with "Show my trips"
+
+4. **User**: "Create an expense"
+   - Returns ExpenseForm
+   - Trip dropdown now includes "Mumbai Client Meeting • August 2026"
+
+5. **User fills expense form**:
+   - Category: Hotel
+   - Merchant: Marriott Mumbai
+   - Amount: ₹15,000
+   - Associated Trip: "Mumbai Client Meeting • August 2026"
+
+6. **User submits**:
+   - Frontend calls `apiService.saveExpense()`
+   - Backend links expense to TRIP-001
+   - Updates trip.total_expenses += 15000
+   - Returns ExpenseCreatedView confirmation
+   - Auto-refreshes with "Show my expenses"
+
+7. **User**: "Show my trips"
+   - Shows trip card with Total Expenses: ₹15,000
+
+---
+
+## 📡 Backend API Architecture
+
+### Orchestrator Flow
+```
+User Message → Groq Orchestrator → Agent Detection → Agent Execution → Result
+```
+
+### Available Agents
+1. **backoffice_agent** - Hotel bookings
+2. **sbt_agent** - Flight bookings
+3. **itinerary_agent** - Schedule/itinerary planning
+4. **rebooking_agent** - Rebooking and cancellations
+5. **revising_agent** - Itinerary review and optimization
+6. **local_guide_agent** - Local recommendations ✅
+7. **expense_agent** - Expense & trip management ✅
+
+### Response Format (All Agents)
+```python
+{
+  "action": str,           # Action identifier
+  "message": str,          # Human-readable message
+  "data": dict,           # Action-specific data
+  "success": bool,        # Success flag
+  "trace": List[Dict]     # Execution trace events
+}
+```
+
+---
+
+## 🧪 Testing Examples
+
+### Test Expense Creation
+```bash
+curl -X POST http://localhost:8000/api/orchestrator/execute/save_expense \
+  -H "Content-Type: application/json" \
+  -d '{
+    "date": "2026-08-14",
+    "category": "Hotel",
+    "merchant": "Marriott Mumbai",
+    "amount": 15000,
+    "currency": "INR",
+    "payment_method": "Corporate Card (Ending 4090)",
+    "gst_amount": 2700,
+    "notes": "Client meeting accommodation",
+    "associated_trip": "Mumbai Client Meeting • August 2026"
+  }'
+```
+
+### Test Trip Creation
+```bash
+curl -X POST http://localhost:8000/api/orchestrator/execute/save_trip \
+  -H "Content-Type: application/json" \
+  -d '{
+    "trip_name": "Mumbai Client Meeting • August 2026",
+    "start_date": "2026-08-14",
+    "end_date": "2026-08-16",
+    "destination": "Mumbai, India",
+    "purpose": "Quarterly business review with key clients"
+  }'
+```
+
+### Test Natural Language
+```bash
+curl -X POST http://localhost:8000/api/orchestrator/execute \
+  -H "Content-Type: application/json" \
+  -d '{
+    "user_message": "Show my expenses",
+    "conversation_history": []
+  }'
+```
+
+---
+
+## 📊 Data Storage
+
+Currently using **in-memory storage** for development:
+
+```python
+# In expense_agent.py
+EXPENSES = []  # List of expense dictionaries
+TRIPS = []     # List of trip dictionaries
+```
+
+### Production Migration Path
+
+Replace with PostgreSQL/MongoDB:
+
+**Expenses Collection**:
+```javascript
+{
+  expense_id: "EXP-2026-001",
+  trip_id: "TRIP-001",
+  trip_name: "Mumbai Client Meeting • August 2026",
+  date: "2026-08-14",
+  category: "Hotel",
+  merchant: "Marriott Mumbai",
+  amount: 15000,
+  currency: "INR",
+  payment_method: "Corporate Card (Ending 4090)",
+  gst_amount: 2700,
+  notes: "Client meeting accommodation",
+  status: "pending",
+  policy_compliance: "compliant",
+  created_at: "2026-08-13T10:30:00Z"
+}
+```
+
+**Trips Collection**:
+```javascript
+{
+  trip_id: "TRIP-001",
+  trip_name: "Mumbai Client Meeting • August 2026",
+  start_date: "2026-08-14",
+  end_date: "2026-08-16",
+  destination: "Mumbai, India",
+  purpose: "Quarterly business review",
+  status: "active",
+  total_expenses: 15000,
+  currency: "INR",
+  created_at: "2026-08-13T10:00:00Z"
+}
+```
+
+---
+
+## 🔌 Frontend API Service
+
+**Location**: `apps/frontend/src/services/api.ts`
+
+**New Methods Added**:
+```typescript
+// Expense operations
+apiService.saveExpense(expenseData)
+apiService.getExpenses()
+
+// Trip operations
+apiService.saveTrip(tripData)
+apiService.getTrips()
+```
+
+**Usage in Components**:
+```typescript
+// In ExpenseForm.tsx
+const result = await apiService.saveExpense(expense);
+if (result.success) {
+  await sendMessage('Show my expenses');
+}
+
+// In TripForm.tsx
+const result = await apiService.saveTrip(trip);
+if (result.success) {
+  await sendMessage('Show my trips');
+}
+```
+
+---
+
+## 🚀 Running the Application
+
+### Backend
+```bash
+cd apps/backend
+python -m uvicorn app.main:app --reload --port 8000
+```
+
+### Frontend
+```bash
+cd apps/frontend
+npm run dev
+```
+
+### Environment Variables Required
+```env
+# Backend (.env)
+GROQ_API_KEY=your_groq_api_key_here
+GROQ_MODEL=llama-3.1-70b-versatile
+
+# Frontend (.env)
+VITE_API_BASE_URL=http://localhost:8000
+```
+
+---
+
+## 📝 Natural Language Commands Summary
+
+### Local Guide Agent
+- "Show attractions in [city]"
+- "Show restaurants in [city]"
+- "Give me travel tips for [city]"
+- "Show hidden gems in [city]"
+- "Complete local guide for [city]"
+
+### Expense Agent
+- "Create an expense"
+- "Show my expenses"
+- "List all expenses"
+- "Create a trip" / "Create a business trip"
+- "Show my trips"
+
+### Hotel Agent (Existing)
+- "List hotels in [city]"
+- "Book a hotel in [city]"
+- "Show my bookings"
+
+### Flight Agent (Existing)
+- "Search flights from [city] to [city]"
+- "Book a flight from [city] to [city]"
+- "Show my flight bookings"
+
+---
+
+## 🎯 Key Features Implemented
+
+✅ **Trip-Expense Linking**: Expenses can be associated with trips
+✅ **Automatic Totals**: Trip expenses auto-calculate when expenses are added
+✅ **Status Tracking**: Both trips and expenses have status workflows
+✅ **Statistics Dashboard**: Real-time stats on expenses page
+✅ **Professional UI**: Consistent cream/beige theme matching screenshots
+✅ **Error Handling**: Proper error messages and loading states
+✅ **Natural Language**: Works seamlessly with conversational AI
+✅ **Form Validation**: Required fields and proper data types
+✅ **Receipt Upload**: Drag & drop with OCR Ready badge
+✅ **Responsive Design**: Works on all screen sizes
+
+---
+
+## 🔍 Code Quality
+
+- **Type Safety**: TypeScript for frontend
+- **Error Handling**: Try-catch blocks with user-friendly messages
+- **Loading States**: Disabled buttons and loading indicators
+- **Consistent Styling**: Tailwind CSS with design system
+- **Clean Architecture**: Separation of concerns (API service, components, context)
+- **Reusable Components**: Card, Badge, Input components
+- **Documentation**: Inline comments and clear function names
+
+---
+
+## 🚧 Future Enhancements (Not Yet Implemented)
+
+The following endpoints are documented but not yet implemented:
 
 ### Schedule Management Endpoints
+```
+POST /api/schedules
+GET  /api/schedules
+GET  /api/schedules/{schedule_id}
+PUT  /api/schedules/{schedule_id}
+DELETE /api/schedules/{schedule_id}
+```
+
+### Rebooking Endpoints
+```
+POST /api/rebookings
+POST /api/rebookings/{rebooking_id}/confirm
+GET  /api/rebookings
+```
+
+### Analysis Endpoints
 
 #### 1. Create Schedule
 ```http

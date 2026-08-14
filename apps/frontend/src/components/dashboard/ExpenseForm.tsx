@@ -1,5 +1,7 @@
 import React, { useState } from 'react';
 import { X, Upload, CheckCircle2, ArrowLeft } from 'lucide-react';
+import { apiService } from '../../services/api';
+import { useOrchestratorContext } from '../../contexts/OrchestratorContext';
 
 interface ExpenseFormProps {
   formData: any;
@@ -8,6 +10,7 @@ interface ExpenseFormProps {
 }
 
 export function ExpenseForm({ formData, onSubmit, onCancel }: ExpenseFormProps) {
+  const { sendMessage } = useOrchestratorContext();
   const [expense, setExpense] = useState({
     expense_id: formData.expense_id || '',
     date: '',
@@ -24,10 +27,32 @@ export function ExpenseForm({ formData, onSubmit, onCancel }: ExpenseFormProps) 
 
   const [receiptFile, setReceiptFile] = useState<File | null>(null);
   const [isDragging, setIsDragging] = useState(false);
+  const [isSubmitting, setIsSubmitting] = useState(false);
+  const [submitError, setSubmitError] = useState<string | null>(null);
 
-  const handleSubmit = (e: React.FormEvent) => {
+  const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
-    onSubmit(expense);
+    setIsSubmitting(true);
+    setSubmitError(null);
+
+    try {
+      // Submit to backend
+      const result = await apiService.saveExpense(expense);
+      
+      // Show success message
+      if (result.success) {
+        onSubmit(expense);
+        // Trigger a refresh of the expense list
+        await sendMessage('Show my expenses');
+      } else {
+        setSubmitError(result.message || 'Failed to save expense');
+      }
+    } catch (error) {
+      console.error('Error saving expense:', error);
+      setSubmitError(error instanceof Error ? error.message : 'Failed to save expense');
+    } finally {
+      setIsSubmitting(false);
+    }
   };
 
   const handleFileChange = (e: React.ChangeEvent<HTMLInputElement>) => {
@@ -85,19 +110,27 @@ export function ExpenseForm({ formData, onSubmit, onCancel }: ExpenseFormProps) 
             <button
               onClick={() => console.log('Save & Add Another')}
               className="flex items-center gap-2 px-4 py-2 text-blue-600 hover:bg-blue-50 rounded-lg transition-colors border border-blue-600"
+              disabled={isSubmitting}
             >
               💾 Save & Add Another
             </button>
             <button
               onClick={handleSubmit}
-              className="flex items-center gap-2 bg-blue-600 hover:bg-blue-700 text-white px-6 py-2 rounded-lg"
+              className="flex items-center gap-2 bg-blue-600 hover:bg-blue-700 text-white px-6 py-2 rounded-lg disabled:bg-gray-400 disabled:cursor-not-allowed"
+              disabled={isSubmitting}
             >
-              💾 Save Expense
+              {isSubmitting ? '⏳ Saving...' : '💾 Save Expense'}
             </button>
           </div>
         </div>
         
-        <div className="mt-3">
+        {submitError && (
+          <div className="mx-6 mb-4 bg-red-50 border border-red-200 rounded-lg p-3">
+            <p className="text-sm text-red-800">❌ {submitError}</p>
+          </div>
+        )}
+        
+        <div className="mt-3 px-6">
           <h1 className="text-2xl font-bold text-gray-900">Create Expense</h1>
           <p className="text-sm text-gray-600 mt-1">Business Trip • July 2026</p>
         </div>

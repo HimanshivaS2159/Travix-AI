@@ -165,6 +165,44 @@ class APIService {
       method: 'GET',
     });
   }
+
+  /**
+   * Save expense
+   */
+  async saveExpense(expenseData: any): Promise<any> {
+    return this.request('/api/orchestrator/execute/save_expense', {
+      method: 'POST',
+      body: JSON.stringify(expenseData),
+    });
+  }
+
+  /**
+   * Save trip
+   */
+  async saveTrip(tripData: any): Promise<any> {
+    return this.request('/api/orchestrator/execute/save_trip', {
+      method: 'POST',
+      body: JSON.stringify(tripData),
+    });
+  }
+
+  /**
+   * Get all expenses
+   */
+  async getExpenses(): Promise<any> {
+    return this.request('/api/orchestrator/execute/show_expenses', {
+      method: 'GET',
+    });
+  }
+
+  /**
+   * Get all trips
+   */
+  async getTrips(): Promise<any> {
+    return this.request('/api/orchestrator/execute/show_trips', {
+      method: 'GET',
+    });
+  }
 }
 
 export const apiService = new APIService();

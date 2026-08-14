@@ -1,268 +1,445 @@
-# Quick Start Guide - Travel Booking System
+# 🚀 Quick Start Guide - Travix AI
 
-## 🚀 Get Started in 30 Seconds
+## Getting Started in 5 Minutes
 
-### What You Can Do Now
-
-#### 1. **Create a Day-Wise Schedule**
-```
-In Chat: "Create a day wise schedule"
-↓
-Opens form to fill:
-- Trip name (e.g., "Delhi Adventure 2026")
-- Start and end dates
-- City selection
-- Daily activities with time, location, duration
-
-Submit → Schedule saved ✓
+### 1. Start the Backend
+```bash
+cd apps/backend
+python -m uvicorn app.main:app --reload --port 8000
 ```
 
-#### 2. **View All Your Schedules**
-```
-In Chat: "Show me my schedule" or "Show me all schedules"
-↓
-Displays all saved trips with:
-- Trip name and city
-- Date range and duration
-- Expandable daily breakdown
-- Copy, Edit, Delete buttons
+### 2. Start the Frontend
+```bash
+cd apps/frontend
+npm run dev
 ```
 
-#### 3. **Handle Flight Delay**
+### 3. Open Browser
+Navigate to: `http://localhost:5173`
+
+---
+
+## 📝 Try These Commands
+
+### Local Guide Agent
+
+**Get Attractions**:
 ```
-In Chat: "My flight is delayed by 3 hours"
-↓
-Shows modal with:
-- Delay compensation: ₹3,000
-- 3 options to choose from
-- You take action immediately
+"Show attractions in Delhi"
+"Show attractions in Mumbai"
 ```
 
-#### 4. **Handle Flight Cancellation**
+**Get Restaurants**:
 ```
-In Chat: "My flight was cancelled"
-↓
-Shows:
-- Refund amount: ₹45,000
-- 3 airline rebooking options
-- Alternative flights with times
-- You select preferred option
+"Show restaurants in Dubai"
+"Show restaurants in Bangalore"
 ```
 
-#### 5. **Handle Hotel Cancellation**
+**Get Travel Tips**:
 ```
-In Chat: "Cancel my hotel booking"
-↓
-Shows:
-- Refund amount and policy
-- 3 alternative hotels
-- Prices and ratings
-- You choose rebook or accept refund
+"Give me travel tips for Delhi"
+"Show travel tips for Mumbai"
 ```
 
-#### 6. **Review Your Trip**
+**Get Hidden Gems**:
 ```
-In Chat: "Review my itinerary"
-↓
-Gets 4 suggestions:
-- Time pacing issues
-- Better routing options
-- Meal break recommendations
-- Optimized timing
+"Show hidden gems in Bangalore"
+"What are hidden gems in Dubai"
 ```
 
-#### 7. **Optimize Your Schedule**
+**Complete Guide**:
 ```
-In Chat: "Optimize my schedule"
-↓
-Returns:
-- Better daily timing
-- Improved routing (45 min saved)
-- Suggested changes
-```
-
-#### 8. **Check Your Budget**
-```
-In Chat: "Check my budget"
-↓
-Shows:
-- Total budget breakdown
-- Hotels, flights, food, activities
-- Spent vs remaining
-- Percentage breakdown
+"Complete local guide for Delhi"
 ```
 
 ---
 
-## 🎯 What Agents Do What?
+### Trip Management
 
-| Agent | What It Does | Say This |
-|-------|-------------|----------|
-| **Itinerary** | Create schedules | "Create a day wise schedule" |
-| **Itinerary** | View schedules | "Show me my schedule" |
-| **Rebooking** | Handle delays | "My flight is delayed" |
-| **Rebooking** | Handle cancellations | "Cancel my flight/hotel" |
-| **Revising** | Review plans | "Review my itinerary" |
-| **Revising** | Optimize timing | "Optimize my schedule" |
-| **Revising** | Check costs | "Check my budget" |
-
----
-
-## 📱 UI Components
-
-### ScheduleForm
-- Fill trip details
-- Add multiple days
-- Add activities per day
-- Auto-save on submit
-
-### ShowSchedules
-- View all trips
-- Expand/collapse days
-- See all activities
-- Copy schedule to clipboard
-
-### RebookingModal
-- Choose from options
-- See compensation/refunds
-- Accept or rebook
-- Process immediately
-
----
-
-## 🔧 Technical Details
-
-### Backend Stack
-- Python 3.11
-- FastAPI
-- Groq API (llama-3.3-70b)
-- 7 AI agents
-
-### Frontend Stack
-- React 19
-- TypeScript
-- Tailwind CSS
-- Real-time updates
-
-### Data Storage
-- In-memory (development)
-- Ready for PostgreSQL (production)
-
----
-
-## 📊 Example Flows
-
-### Complete Trip Planning Flow
+**Create a Trip**:
 ```
-1. User: "Create a day wise schedule"
-   → Opens form
-
-2. User: Fills Delhi trip (Aug 14-16)
-   → Save schedule
-
-3. User: "Show me my schedule"
-   → Displays Delhi trip
-
-4. User: "Review my itinerary"
-   → Gets 4 suggestions
-
-5. User: "Optimize my schedule"
-   → Saves time on routing
-
-6. User: "My flight is delayed"
-   → Modal with options
-
-7. User: Selects "Rebook option"
-   → Confirmed ✓
-
-Result: Trip fully planned and rebooking handled!
+"Create a trip"
+"Create a business trip"
 ```
+
+Then fill the form:
+- Trip Name: e.g., "Mumbai Client Meeting • August 2026"
+- Start Date: 2026-08-14
+- End Date: 2026-08-16
+- Destination: Mumbai, India
+- Purpose: Quarterly business review with key clients
+
+**View Your Trips**:
+```
+"Show my trips"
+"List all trips"
+```
+
+---
+
+### Expense Management
+
+**Create an Expense**:
+```
+"Create an expense"
+```
+
+Then fill the form:
+- **Expense Core Details**:
+  - Date: 2026-08-14
+  - Category: Hotel
+  - Merchant: Marriott Mumbai
+  - Amount: 15000
+  - Currency: INR
+
+- **Corporate Audit & Policy**:
+  - Associated Trip: Select your trip (e.g., "Mumbai Client Meeting")
+  - Payment Method: Corporate Card (Ending 4090)
+  - GST Amount: 2700
+  - Notes: Client meeting accommodation
+
+- **Receipt Upload** (Optional):
+  - Drag & drop a receipt file (JPG, PNG, or PDF)
+
+**View Your Expenses**:
+```
+"Show my expenses"
+"List all expenses"
+```
+
+---
+
+## 🔄 Complete Workflow Example
+
+### Scenario: Business Trip with Expenses
+
+**Step 1: Create the Trip**
+```
+You: "Create a business trip"
+```
+Fill form:
+- Trip Name: "Mumbai Q4 Review • August 2026"
+- Dates: Aug 14-16, 2026
+- Destination: Mumbai, Maharashtra, India
+- Purpose: "Quarterly business review with Mumbai team and clients"
+- Click "💾 Save Trip"
+
+**Step 2: View Trip Created**
+You'll see a success confirmation with trip details.
+
+**Step 3: Create Hotel Expense**
+```
+You: "Create an expense"
+```
+Fill form:
+- Date: 2026-08-14
+- Category: Hotel
+- Merchant: Taj Mahal Palace Mumbai
+- Amount: 25000
+- Currency: INR
+- Associated Trip: "Mumbai Q4 Review • August 2026"
+- Payment Method: Corporate Card
+- GST Amount: 4500
+- Notes: "3 nights accommodation for business review"
+- Click "💾 Save Expense"
+
+**Step 4: Create Flight Expense**
+```
+You: "Create an expense"
+```
+Fill form:
+- Date: 2026-08-14
+- Category: Flight
+- Merchant: IndiGo Airlines
+- Amount: 8500
+- Currency: INR
+- Associated Trip: "Mumbai Q4 Review • August 2026"
+- Payment Method: Corporate Card
+- Click "💾 Save Expense"
+
+**Step 5: Create Food Expense**
+```
+You: "Create an expense"
+```
+Fill form:
+- Date: 2026-08-15
+- Category: Food & Dining
+- Merchant: Trishna Restaurant
+- Amount: 4500
+- Currency: INR
+- Associated Trip: "Mumbai Q4 Review • August 2026"
+- Payment Method: Corporate Card
+- Notes: "Client dinner meeting"
+- Click "💾 Save Expense"
+
+**Step 6: View All Expenses**
+```
+You: "Show my expenses"
+```
+You'll see:
+- Statistics Dashboard showing total: ₹38,000
+- 3 expense cards with all details
+- All marked with trip "Mumbai Q4 Review • August 2026"
+
+**Step 7: View Trip Summary**
+```
+You: "Show my trips"
+```
+You'll see:
+- Trip card for "Mumbai Q4 Review • August 2026"
+- Total Expenses: ₹38,000 (auto-calculated!)
+- Status: Active
+- Duration: 3 days
+
+---
+
+## 🗺️ Planning Your Trip with Local Guide
+
+**Before the Trip**:
+```
+You: "Complete local guide for Mumbai"
+```
+
+**View Different Categories**:
+- Click **Attractions** tab → See Gateway of India, Marine Drive, Elephanta Caves
+- Click **Restaurants** tab → See Trishna, Britannia & Co, Leopold Cafe
+- Click **Travel Tips** tab → Safety tips, best time to visit, currency info
+- Click **Hidden Gems** tab → Local markets, street food, authentic experiences
+
+**Save Favorite Places**:
+Take notes from the recommendations and plan your itinerary!
 
 ---
 
 ## 💡 Pro Tips
 
-1. **Be Specific**: "My flight AI-600 is delayed 3 hours" gives better results than "delayed"
+### For Trip Management:
+1. **Create Trip First**: Always create the trip before adding expenses
+2. **Descriptive Names**: Use format "City + Purpose + Month/Year"
+3. **Accurate Dates**: Double-check start and end dates
+4. **Clear Purpose**: Write detailed business purpose for approvals
 
-2. **Use Keywords**: System recognizes:
-   - "create" + "schedule" = Schedule form
-   - "show" + "schedule" = List schedules
-   - "delay" + "flight" = Flight delay handling
-   - "cancel" + "hotel" = Hotel cancellation
-   - "review" + "itinerary" = Review suggestions
+### For Expense Management:
+1. **Link to Trip**: Always select the associated trip from dropdown
+2. **Include GST**: Add GST amount for compliant expenses
+3. **Add Notes**: Include business justification in notes
+4. **Upload Receipt**: Upload receipt immediately while you have it
+5. **Check Totals**: Use "Show my trips" to verify trip totals are correct
 
-3. **One Action at a Time**: Each prompt triggers one agent
-
-4. **Check Trace View**: See exactly what happened in the "Trace View" tab
-
-5. **Flow View**: Visualize the agent's thinking in "Flow View" tab
-
----
-
-## ⚙️ Configuration
-
-### Available Cities
-- Delhi
-- Mumbai
-- Bangalore
-- Goa
-- Jaipur
-
-### Compensation Rules
-- Flight delay < 2 hours: ₹1,500
-- Flight delay 2-4 hours: ₹3,000
-- Flight delay > 4 hours: ₹5,000
-
-### Refund Policies
-- Full flight refund on cancellation
-- 50% hotel refund if cancelled within 48 hours
-- Full refund if cancelled >48 hours before check-in
+### For Local Guide:
+1. **Research Early**: Check local guide before your trip
+2. **Save Info**: Take screenshots or notes from recommendations
+3. **Check Tips**: Read travel tips for safety and cultural info
+4. **Explore Gems**: Don't miss the hidden gems for authentic experiences
 
 ---
 
-## 🎨 UI Theme
+## 🎨 UI Tips
 
-- Dark mode (dark blue/gray)
-- Light mode for result display (off-white)
-- Color-coded agents:
-  - Orchestrator: Blue
-  - SBT Agent: Cyan
-  - Expense Agent: Green
-  - BackOffice Agent: Dark Blue
-  - **Itinerary Agent: Purple** ← NEW
-  - **Rebooking Agent: Red** ← NEW
-  - **Revising Agent: Violet** ← NEW
+### Navigation:
+- **Left Sidebar**: Select different sub-agents
+- **Chat Panel**: Type natural language commands
+- **Result View**: See results, forms, and data displays
+
+### Forms:
+- **Required Fields**: Marked with red asterisk (*)
+- **Date Pickers**: Click calendar icon to select dates
+- **Dropdowns**: Click to see all options
+- **Drag & Drop**: Drag receipt files to upload area
+- **Buttons**: 
+  - Blue = Primary action
+  - White = Secondary action
+  - Gray = Disabled (processing)
+
+### Status Badges:
+- 🔵 **Blue (Active)**: Trip is active
+- 🟢 **Green (Approved)**: Expense approved
+- 🟡 **Yellow (Pending)**: Waiting for approval
+- 🔴 **Red (Rejected/Cancelled)**: Rejected or cancelled
+
+---
+
+## 🐛 Troubleshooting
+
+### "Error: Failed to save expense"
+- Check all required fields are filled
+- Ensure amount is a valid number
+- Verify date format is correct
+- Try again or refresh page
+
+### "No trips found"
+- Create a trip first using "Create a trip"
+- Check if trip was saved successfully
+- Try "Show my trips" to refresh
+
+### "Backend not responding"
+- Verify backend is running on port 8000
+- Check GROQ_API_KEY is set in backend/.env
+- Look at backend terminal for errors
+- Restart backend server
+
+### Form Not Submitting
+- Check for validation errors (red text)
+- Fill all required fields (marked with *)
+- Wait for previous operation to complete
+- Check browser console for errors
+
+---
+
+## 📱 Keyboard Shortcuts
+
+- **Enter**: Send message in chat
+- **Escape**: Close modals/forms
+- **Tab**: Navigate between form fields
+- **Ctrl/Cmd + R**: Refresh page
+
+---
+
+## 🎯 Best Practices
+
+### 1. Trip Planning Workflow
+```
+1. Research destination with Local Guide
+2. Create trip with dates and purpose
+3. Add expenses as they occur
+4. Review trip totals regularly
+5. Submit for approval when complete
+```
+
+### 2. Expense Entry Workflow
+```
+1. Collect receipt immediately
+2. Create expense while details are fresh
+3. Link to appropriate trip
+4. Upload receipt file
+5. Add detailed notes
+6. Submit same day
+```
+
+### 3. Organized Naming
+```
+✓ Good: "Mumbai Client Review • Q4 2026"
+✓ Good: "Dubai Conference • Aug 2026"
+✓ Good: "Bangalore Training • Sep 2026"
+
+✗ Avoid: "Trip 1"
+✗ Avoid: "Mumbai"
+✗ Avoid: "Business Trip"
+```
+
+---
+
+## 📊 Understanding Statistics
+
+### Expense Dashboard:
+- **Total Amount**: Sum of all expenses (all statuses)
+- **Pending**: Expenses awaiting approval
+- **Approved**: Expenses that are approved
+- **Average**: Total amount ÷ number of expenses
+
+### Trip Dashboard:
+- **Total Trips**: Count of all trips
+- **Active Trips**: Trips currently ongoing or upcoming
+- **Total Expenses**: Sum across all trips
+
+---
+
+## 🔄 Data Flow
+
+```
+User Types Command
+    ↓
+Groq Orchestrator Analyzes
+    ↓
+Routes to Appropriate Agent
+    ↓
+Agent Executes Action
+    ↓
+Returns Result
+    ↓
+Frontend Displays Result
+```
 
 ---
 
 ## 📞 Support
 
-### Common Issues
+### Common Questions:
 
-**Q: Schedule didn't save?**
-- Check if all required fields are filled (trip name, dates, city)
-- Try submitting again
+**Q: Can I edit an expense after creating it?**
+A: Currently, you need to create a new one. Edit feature coming soon.
 
-**Q: Can't see rebooking options?**
-- Make sure you said "delayed" or "cancelled"
-- Wait for the modal to appear
+**Q: Can I delete a trip?**
+A: Currently not available. Status can be changed to "cancelled".
 
-**Q: Budget shows 0?**
-- This is demo data - in production, it pulls from actual bookings
+**Q: Do expenses really update trip totals?**
+A: Yes! Automatically when you select the associated trip.
+
+**Q: Can I create expenses without a trip?**
+A: Yes! Select "None" in Associated Trip dropdown.
+
+**Q: How do I approve expenses?**
+A: Use command "Approve expenses" (feature documented, approval flow ready).
 
 ---
 
-## 🚀 Next Steps
+## 🚀 Quick Commands Cheat Sheet
 
-1. ✅ Try creating a schedule
-2. ✅ Add multiple days
-3. ✅ View and copy schedules
-4. ✅ Test rebooking flows
-5. ✅ Review and optimize
-6. ✅ Check budget breakdown
+```
+┌─────────────────────────────────────────────────────┐
+│  LOCAL GUIDE                                        │
+├─────────────────────────────────────────────────────┤
+│  "Show attractions in [city]"                       │
+│  "Show restaurants in [city]"                       │
+│  "Give me travel tips for [city]"                   │
+│  "Show hidden gems in [city]"                       │
+│  "Complete local guide for [city]"                  │
+└─────────────────────────────────────────────────────┘
 
-## 🎉 You're All Set!
+┌─────────────────────────────────────────────────────┐
+│  TRIP MANAGEMENT                                    │
+├─────────────────────────────────────────────────────┤
+│  "Create a trip"                                    │
+│  "Create a business trip"                           │
+│  "Show my trips"                                    │
+│  "List all trips"                                   │
+└─────────────────────────────────────────────────────┘
 
-Everything is working. Start using the system by typing prompts in the chat box on the left!
+┌─────────────────────────────────────────────────────┐
+│  EXPENSE MANAGEMENT                                 │
+├─────────────────────────────────────────────────────┤
+│  "Create an expense"                                │
+│  "Show my expenses"                                 │
+│  "List all expenses"                                │
+└─────────────────────────────────────────────────────┘
 
-**Tip**: Start with "Create a day wise schedule" to see the form in action.
+┌─────────────────────────────────────────────────────┐
+│  HOTELS (Existing)                                  │
+├─────────────────────────────────────────────────────┤
+│  "List hotels in [city]"                            │
+│  "Book a hotel in [city]"                           │
+│  "Show my bookings"                                 │
+└─────────────────────────────────────────────────────┘
+
+┌─────────────────────────────────────────────────────┐
+│  FLIGHTS (Existing)                                 │
+├─────────────────────────────────────────────────────┤
+│  "Search flights from [city] to [city]"            │
+│  "Book a flight"                                    │
+│  "Show my flight bookings"                          │
+└─────────────────────────────────────────────────────┘
+```
+
+---
+
+## ✅ You're Ready!
+
+You now have everything you need to:
+- ✅ Plan trips with local recommendations
+- ✅ Create and manage business trips
+- ✅ Track expenses with receipt uploads
+- ✅ Link expenses to trips automatically
+- ✅ View statistics and summaries
+- ✅ Use natural language for everything
+
+**Happy traveling! 🌍✈️**
