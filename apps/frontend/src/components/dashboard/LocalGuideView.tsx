@@ -1,7 +1,5 @@
 import React, { useState } from 'react';
 import { MapPin, Star, Clock, DollarSign, Info, Eye, Utensils, Lightbulb, Gem } from 'lucide-react';
-import { Card } from '../ui/Card';
-import { Badge } from '../ui/Badge';
 
 interface Attraction {
   id: string;
@@ -145,18 +143,18 @@ function AttractionsTab({ attractions }: { attractions: Attraction[] }) {
   return (
     <div className="grid grid-cols-1 lg:grid-cols-2 gap-6">
       {attractions.map((attraction) => (
-        <Card key={attraction.id} className="p-5 hover:shadow-lg transition-shadow">
+        <div key={attraction.id} className="bg-white rounded-lg shadow-sm border border-gray-200 p-5 hover:shadow-md transition-shadow">
           <div className="mb-3">
             <div className="flex items-start justify-between mb-2">
               <h3 className="text-lg font-bold text-gray-900">{attraction.name}</h3>
-              <Badge variant="warning" className="flex items-center gap-1">
-                <Star className="w-3 h-3 fill-current" />
-                {attraction.rating}
-              </Badge>
+              <div className="flex items-center gap-1 bg-yellow-100 px-2 py-1 rounded">
+                <Star className="w-3 h-3 text-yellow-600 fill-yellow-600" />
+                <span className="text-sm font-medium text-yellow-700">{attraction.rating}</span>
+              </div>
             </div>
-            <Badge variant="info" className="text-xs">
+            <span className="inline-block bg-blue-100 text-blue-700 text-xs px-2 py-1 rounded">
               {attraction.category}
-            </Badge>
+            </span>
           </div>
 
           <p className="text-sm text-gray-600 mb-4">{attraction.description}</p>
@@ -176,7 +174,7 @@ function AttractionsTab({ attractions }: { attractions: Attraction[] }) {
             </div>
           </div>
 
-          <div className="mb-4 p-3 bg-blue-50 rounded-lg">
+          <div className="mb-4 p-3 bg-blue-50 rounded-lg border border-blue-100">
             <div className="flex items-center gap-2 text-sm text-blue-800 mb-1">
               <Clock className="w-4 h-4" />
               <span className="font-medium">Best time to visit:</span>
@@ -200,7 +198,7 @@ function AttractionsTab({ attractions }: { attractions: Attraction[] }) {
               </ul>
             </div>
           )}
-        </Card>
+        </div>
       ))}
     </div>
   );
@@ -211,22 +209,22 @@ function RestaurantsTab({ restaurants }: { restaurants: Restaurant[] }) {
   return (
     <div className="grid grid-cols-1 lg:grid-cols-2 gap-6">
       {restaurants.map((restaurant) => (
-        <Card key={restaurant.id} className="p-5 hover:shadow-lg transition-shadow">
+        <div key={restaurant.id} className="bg-white rounded-lg shadow-sm border border-gray-200 p-5 hover:shadow-md transition-shadow">
           <div className="mb-3">
             <div className="flex items-start justify-between mb-2">
               <h3 className="text-lg font-bold text-gray-900">{restaurant.name}</h3>
-              <Badge variant="warning" className="flex items-center gap-1">
-                <Star className="w-3 h-3 fill-current" />
-                {restaurant.rating}
-              </Badge>
+              <div className="flex items-center gap-1 bg-yellow-100 px-2 py-1 rounded">
+                <Star className="w-3 h-3 text-yellow-600 fill-yellow-600" />
+                <span className="text-sm font-medium text-yellow-700">{restaurant.rating}</span>
+              </div>
             </div>
             <div className="flex gap-2">
-              <Badge variant="info" className="text-xs">
+              <span className="bg-blue-100 text-blue-700 text-xs px-2 py-1 rounded">
                 {restaurant.cuisine}
-              </Badge>
-              <Badge variant="secondary" className="text-xs">
+              </span>
+              <span className="bg-gray-100 text-gray-700 text-xs px-2 py-1 rounded">
                 {restaurant.price_range}
-              </Badge>
+              </span>
             </div>
           </div>
 
@@ -238,7 +236,7 @@ function RestaurantsTab({ restaurants }: { restaurants: Restaurant[] }) {
           </div>
 
           {restaurant.must_try.length > 0 && (
-            <div className="p-3 bg-orange-50 rounded-lg">
+            <div className="p-3 bg-orange-50 rounded-lg border border-orange-100">
               <div className="flex items-center gap-2 text-sm font-medium text-orange-800 mb-2">
                 <Utensils className="w-4 h-4" />
                 Must Try Dishes:
@@ -255,7 +253,7 @@ function RestaurantsTab({ restaurants }: { restaurants: Restaurant[] }) {
               </div>
             </div>
           )}
-        </Card>
+        </div>
       ))}
     </div>
   );
@@ -266,11 +264,11 @@ function TipsTab({ tips }: { tips: LocalTip[] }) {
   const getImportanceBadge = (importance: string) => {
     switch (importance) {
       case 'high':
-        return <Badge variant="error">High Priority</Badge>;
+        return <span className="bg-red-100 text-red-700 text-xs px-2 py-1 rounded">High Priority</span>;
       case 'medium':
-        return <Badge variant="warning">Medium</Badge>;
+        return <span className="bg-yellow-100 text-yellow-700 text-xs px-2 py-1 rounded">Medium</span>;
       default:
-        return <Badge variant="secondary">Low</Badge>;
+        return <span className="bg-gray-100 text-gray-700 text-xs px-2 py-1 rounded">Low</span>;
     }
   };
 
@@ -285,7 +283,7 @@ function TipsTab({ tips }: { tips: LocalTip[] }) {
   return (
     <div className="space-y-6">
       {Object.entries(categorizedTips).map(([category, categoryTips]) => (
-        <Card key={category} className="p-5">
+        <div key={category} className="bg-white rounded-lg shadow-sm border border-gray-200 p-5">
           <h3 className="text-lg font-bold text-gray-900 mb-4 flex items-center gap-2">
             <Lightbulb className="w-5 h-5 text-yellow-600" />
             {category}
@@ -303,7 +301,7 @@ function TipsTab({ tips }: { tips: LocalTip[] }) {
               </div>
             ))}
           </div>
-        </Card>
+        </div>
       ))}
     </div>
   );
@@ -314,9 +312,9 @@ function GemsTab({ gems }: { gems: string[] }) {
   return (
     <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4">
       {gems.map((gem, idx) => (
-        <Card
+        <div
           key={idx}
-          className="p-4 hover:shadow-lg transition-shadow cursor-pointer"
+          className="bg-white rounded-lg shadow-sm border border-gray-200 p-4 hover:shadow-md transition-shadow cursor-pointer"
         >
           <div className="flex items-start gap-3">
             <div className="w-10 h-10 bg-gradient-to-br from-purple-500 to-pink-500 rounded-lg flex items-center justify-center flex-shrink-0">
@@ -326,7 +324,7 @@ function GemsTab({ gems }: { gems: string[] }) {
               <p className="text-sm font-medium text-gray-900">{gem}</p>
             </div>
           </div>
-        </Card>
+        </div>
       ))}
     </div>
   );

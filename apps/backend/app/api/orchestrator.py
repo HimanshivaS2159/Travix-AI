@@ -17,6 +17,7 @@ from ..services.itinerary_agent import ItineraryAgent
 from ..services.rebooking_agent import RebookingAgent
 from ..services.revising_agent import RevisingAgent
 from ..services.local_guide_agent import LocalGuideAgent
+from ..services.expense_agent import ExpenseAgent
 from ..config import get_settings
 from pydantic import BaseModel
 
@@ -31,6 +32,7 @@ _itinerary_agent_instance: Optional[ItineraryAgent] = None
 _rebooking_agent_instance: Optional[RebookingAgent] = None
 _revising_agent_instance: Optional[RevisingAgent] = None
 _local_guide_agent_instance: Optional[LocalGuideAgent] = None
+_expense_agent_instance: Optional[ExpenseAgent] = None
 
 
 def get_orchestrator() -> GroqOrchestrator:
@@ -112,6 +114,16 @@ def get_local_guide_agent() -> LocalGuideAgent:
     return _local_guide_agent_instance
 
 
+def get_expense_agent() -> ExpenseAgent:
+    """Dependency to get Expense agent instance"""
+    global _expense_agent_instance
+    
+    if _expense_agent_instance is None:
+        _expense_agent_instance = ExpenseAgent()
+    
+    return _expense_agent_instance
+
+
 @router.post("/analyze", response_model=OrchestratorResponse)
 async def analyze_request(
     request: OrchestratorRequest,
@@ -158,7 +170,8 @@ async def execute_request(
     itinerary_agent: ItineraryAgent = Depends(get_itinerary_agent),
     rebooking_agent: RebookingAgent = Depends(get_rebooking_agent),
     revising_agent: RevisingAgent = Depends(get_revising_agent),
-    local_guide_agent: LocalGuideAgent = Depends(get_local_guide_agent)
+    local_guide_agent: LocalGuideAgent = Depends(get_local_guide_agent),
+    expense_agent: ExpenseAgent = Depends(get_expense_agent)
 ) -> dict:
     """
     Unified execution endpoint - routes and executes agent actions
@@ -196,6 +209,8 @@ async def execute_request(
             result = revising_agent.execute(request.user_message)
         elif routing.agent == "local_guide_agent":
             result = local_guide_agent.execute(request.user_message)
+        elif routing.agent == "expense_agent":
+            result = expense_agent.execute(request.user_message)
         else:
             # For other agents not yet implemented
             return {
@@ -484,3 +499,199 @@ async def execute_local_guide(
     except Exception as e:
         logger.error(f"Error executing local_guide: {e}")
         raise HTTPException(status_code=500, detail="Error getting local guide")
+
+
+# ==================== Expense Tool Endpoints ====================
+
+class CreateExpenseRequest(BaseModel):
+    """Request model for creating expense"""
+    date: str
+    category: str
+    merchant: str
+    amount: float
+    currency: str
+    payment_method: str
+    gst_amount: Optional[float] = None
+    notes: Optional[str] = None
+    receipt_url: Optional[str] = None
+    associated_trip: Optional[str] = None
+
+
+class CreateTripRequest(BaseModel):
+    """Request model for creating trip"""
+    trip_name: str
+    start_date: str
+    end_date: str
+    destination: str
+    purpose: str
+
+
+class ApproveExpenseRequest(BaseModel):
+    """Request model for approving expense"""
+    expense_id: str
+    status: str  # approved, rejected
+    notes: Optional[str] = None
+
+
+@router.post("/execute/create_expense_form")
+async def execute_create_expense_form(
+    agent: ExpenseAgent = Depends(get_expense_agent)
+) -> dict:
+    """
+    Execute create_expense form
+    
+    Returns:
+        Tool result with expense creation form
+    """
+    try:
+        logger.info("Executing create_expense_form")
+        result = agent.create_expense_form([])
+        return result.model_dump()
+    except Exception as e:
+        logger.error(f"Error executing create_expense_form: {e}")
+        raise HTTPException(status_code=500, detail="Error creating expense form")
+
+
+@router.post("/execute/save_expense")
+async def execute_save_expense(
+    request: CreateExpenseRequest,
+    agent: ExpenseAgent = Depends(get_expense_agent)
+) -> dict:
+    """
+    Execute save_expense
+    
+    Args:
+        request: Expense details
+        
+    Returns:
+        Tool result with saved expense
+    """
+    try:
+        logger.info(f"Executing save_expense")
+        result = agent.save_expense(request.model_dump())
+        return result.model_dump()
+    except Exception as e:
+        logger.error(f"Error executing save_expense: {e}")
+        raise HTTPException(status_code=500, detail="Error saving expense")
+
+
+@router.get("/execute/show_expenses")
+async def execute_show_expenses(
+    agent: ExpenseAgent = Depends(get_expense_agent)
+) -> dict:
+    """
+    Execute show_expenses
+    
+    Returns:
+        Tool result with all expenses
+    """
+    try:
+        logger.info("Executing show_expenses")
+        result = agent.show_expenses([])
+        return result.model_dump()
+    except Exception as e:
+        logger.error(f"Error executing show_expenses: {e}")
+        raise HTTPException(status_code=500, detail="Error showing expenses")
+
+
+@router.post("/execute/create_trip_form")
+async def execute_create_trip_form(
+    agent: ExpenseAgent = Depends(get_expense_agent)
+) -> dict:
+    """
+    Execute create_trip form
+    
+    Returns:
+        Tool result with trip creation form
+    """
+    try:
+        logger.info("Executing create_trip_form")
+        result = agent.create_trip_form([])
+        return result.model_dump()
+    except Exception as e:
+        logger.error(f"Error executing create_trip_form: {e}")
+        raise HTTPException(status_code=500, detail="Error creating trip form")
+
+
+@router.post("/execute/save_trip")
+async def execute_save_trip(
+    request: CreateTripRequest,
+    agent: ExpenseAgent = Depends(get_expense_agent)
+) -> dict:
+    """
+    Execute save_trip
+    
+    Args:
+        request: Trip details
+        
+    Returns:
+        Tool result with saved trip
+    """
+    try:
+        logger.info(f"Executing save_trip")
+        result = agent.save_trip(request.model_dump())
+        return result.model_dump()
+    except Exception as e:
+        logger.error(f"Error executing save_trip: {e}")
+        raise HTTPException(status_code=500, detail="Error saving trip")
+
+
+@router.get("/execute/show_trips")
+async def execute_show_trips(
+    agent: ExpenseAgent = Depends(get_expense_agent)
+) -> dict:
+    """
+    Execute show_trips
+    
+    Returns:
+        Tool result with all trips
+    """
+    try:
+        logger.info("Executing show_trips")
+        result = agent.show_trips([])
+        return result.model_dump()
+    except Exception as e:
+        logger.error(f"Error executing show_trips: {e}")
+        raise HTTPException(status_code=500, detail="Error showing trips")
+
+
+@router.get("/execute/approve_expenses_form")
+async def execute_approve_expenses_form(
+    agent: ExpenseAgent = Depends(get_expense_agent)
+) -> dict:
+    """
+    Execute approve_expenses form
+    
+    Returns:
+        Tool result with pending expenses
+    """
+    try:
+        logger.info("Executing approve_expenses_form")
+        result = agent.approve_expenses_form([])
+        return result.model_dump()
+    except Exception as e:
+        logger.error(f"Error executing approve_expenses_form: {e}")
+        raise HTTPException(status_code=500, detail="Error loading approval form")
+
+
+@router.post("/execute/approve_expense")
+async def execute_approve_expense(
+    request: ApproveExpenseRequest,
+    agent: ExpenseAgent = Depends(get_expense_agent)
+) -> dict:
+    """
+    Execute approve_expense
+    
+    Args:
+        request: Approval details
+        
+    Returns:
+        Tool result with approved expense
+    """
+    try:
+        logger.info(f"Executing approve_expense for {request.expense_id}")
+        result = agent.approve_expense(request.expense_id, request.status, request.notes)
+        return result.model_dump()
+    except Exception as e:
+        logger.error(f"Error executing approve_expense: {e}")
+        raise HTTPException(status_code=500, detail="Error approving expense")
