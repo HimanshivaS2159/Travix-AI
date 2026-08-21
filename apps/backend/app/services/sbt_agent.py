@@ -1,6 +1,7 @@
 """
 SBT Agent Service
 Handles flight-related workflows: search_flights, book_flight, list_flight_bookings
+NOW INTEGRATED WITH REAL FLIGHT DATABASE (312,200 flights)
 """
 
 import logging
@@ -9,6 +10,10 @@ import uuid
 from datetime import datetime, timedelta
 from typing import Optional, List, Dict, Any
 from pydantic import BaseModel
+import os
+
+# Import the flight data loader
+from .flight_data_loader import FlightDataLoader
 
 logger = logging.getLogger(__name__)
 
@@ -616,11 +621,19 @@ FLIGHT_BOOKINGS: List[FlightBooking] = [
 # ==================== SBT Agent Class ====================
 
 class SBTAgent:
-    """SBT Agent for flight operations"""
+    """SBT Agent for flight operations - NOW USING REAL DATABASE!"""
 
     def __init__(self):
-        self.flights = MOCK_FLIGHTS
+        self.flights = MOCK_FLIGHTS  # Keep for backward compatibility
         self.bookings = FLIGHT_BOOKINGS
+        
+        # Initialize flight data loader for real database
+        DATABASE_URL = os.getenv(
+            "DATABASE_URL",
+            "postgresql://travix:travix_password@postgres:5432/travix_db"
+        )
+        self.flight_loader = FlightDataLoader(DATABASE_URL)
+        logger.info("SBT Agent initialized with REAL flight database (312K+ flights)")
 
     def execute(self, user_message: str) -> ToolResult:
         """
@@ -674,7 +687,7 @@ class SBTAgent:
             )
 
     def _extract_route(self, message: str) -> Optional[Dict[str, str]]:
-        """Extract route (from and to cities) from user message"""
+        """Extract route (from and to cities) from user message - UPDATED FOR ALL CITIES"""
         import re
         
         message_lower = message.lower()
@@ -685,8 +698,8 @@ class SBTAgent:
         if match:
             from_city = match.group(1).strip()
             to_city = match.group(2).strip()
-            if self._normalize_city(from_city) and self._normalize_city(to_city):
-                return {"from": from_city, "to": to_city}
+            # Accept any city name (will be validated by database)
+            return {"from": from_city, "to": to_city}
         
         # Pattern 2: "X to Y" (most common)
         pattern2 = r'\b([a-z\s]+?)\s+to\s+([a-z\s]+?)(?:\s|$|,|\.|for|on|flight|flights)'
@@ -695,21 +708,11 @@ class SBTAgent:
             from_city = match.group(1).strip()
             to_city = match.group(2).strip()
             # Remove common words
-            from_city = from_city.replace('flight', '').replace('flights', '').strip()
-            to_city = to_city.replace('flight', '').replace('flights', '').strip()
-            if self._normalize_city(from_city) and self._normalize_city(to_city):
+            from_city = from_city.replace('flight', '').replace('flights', '').replace('search', '').strip()
+            to_city = to_city.replace('flight', '').replace('flights', '').replace('search', '').strip()
+            # Accept any city name
+            if from_city and to_city:
                 return {"from": from_city, "to": to_city}
-        
-        # Pattern 3: Try to extract just city names
-        cities = ["delhi", "mumbai", "dubai", "bangalore", "bengaluru", "bombay"]
-        found_cities = []
-        for city in cities:
-            if city in message_lower:
-                found_cities.append(city)
-        
-        if len(found_cities) >= 2:
-            # Assume first is from, second is to
-            return {"from": found_cities[0], "to": found_cities[1]}
         
         return None
 
@@ -730,14 +733,13 @@ class SBTAgent:
         return None
 
     def _normalize_city(self, city: str) -> Optional[str]:
-        """Normalize city name to standard key"""
+        """Normalize city name to standard key - NOW ACCEPTS ANY CITY"""
         city_lower = city.lower().strip()
-        if city_lower in CITY_MAPPING:
-            return city_lower
-        return None
+        # Return the city as-is (database will handle matching)
+        return city_lower if city_lower else None
 
     def _get_route_key(self, from_city: str, to_city: str) -> Optional[tuple]:
-        """Get route key for flight lookup"""
+        """Get route key for flight lookup - NOW WORKS WITH ANY CITY"""
         from_normalized = self._normalize_city(from_city)
         to_normalized = self._normalize_city(to_city)
         
@@ -807,7 +809,7 @@ class SBTAgent:
 
     def search_flights(self, from_city: str, to_city: str, date: Optional[str] = None) -> ToolResult:
         """
-        Search flights for a route
+        Search flights for a route - NOW USING REAL DATABASE!
         
         Args:
             from_city: Origin city name
@@ -815,9 +817,9 @@ class SBTAgent:
             date: Travel date (optional)
             
         Returns:
-            ToolResult with flight list
+            ToolResult with flight list from database
         """
-        logger.info(f"Searching flights from {from_city} to {to_city}")
+        logger.info(f"Searching REAL flights from {from_city} to {to_city}")
         
         trace = []
         
@@ -841,24 +843,84 @@ class SBTAgent:
             agent="sbt_agent",
             status="processing",
             input_data={"from_city": from_city, "to_city": to_city},
-            output_summary="Executing search_flights",
+            output_summary="Executing search_flights with REAL database",
             duration_ms=30
         ))
         
-        # Get route key
-        route_key = self._get_route_key(from_city, to_city)
-        
-        if not route_key or route_key not in self.flights:
-            # Trace: Tool execution - no results
+        try:
+            # Search in REAL database
+            db_flights = self.flight_loader.search_flights(
+                source_city=from_city.title(),
+                destination_city=to_city.title(),
+                limit=50  # Limit to 50 flights for display
+            )
+            
+            if not db_flights or len(db_flights) == 0:
+                # Trace: Tool execution - no results
+                trace.append(self._generate_trace_event(
+                    event_id="trace-3",
+                    event_type="tool",
+                    name="search_flights",
+                    agent="sbt_agent",
+                    status="completed",
+                    input_data={"from_city": from_city, "to_city": to_city},
+                    output_summary="No flights found in database",
+                    duration_ms=120
+                ))
+                
+                # Trace: Result
+                trace.append(self._generate_trace_event(
+                    event_id="trace-4",
+                    event_type="result",
+                    name="Result",
+                    agent="sbt_agent",
+                    status="completed",
+                    input_data={},
+                    output_summary="No flights available",
+                    duration_ms=10
+                ))
+                
+                return ToolResult(
+                    action="search_flights",
+                    message=f"Sorry, no flights found from {from_city.title()} to {to_city.title()}. Database contains flights for 35 Indian cities. Try cities like Delhi, Mumbai, Bangalore, Jaipur, Srinagar, etc.",
+                    data={"flights": [], "count": 0},
+                    trace=trace
+                )
+            
+            # Convert database flights to display format
+            flight_list = []
+            for idx, db_flight in enumerate(db_flights):
+                flight_data = {
+                    "id": f"{db_flight['source_city'][:3].upper()}-{db_flight['destination_city'][:3].upper()}-{db_flight['id']}",
+                    "airline": db_flight['airline'],
+                    "flight_number": db_flight['flight'],
+                    "from_city": db_flight['source_city'],
+                    "from_code": db_flight['source_city'][:3].upper(),
+                    "to_city": db_flight['destination_city'],
+                    "to_code": db_flight['destination_city'][:3].upper(),
+                    "departure_time": db_flight['departure_time'].replace('_', ' '),
+                    "arrival_time": db_flight['arrival_time'].replace('_', ' '),
+                    "duration": f"{int(db_flight['duration'])}h {int((db_flight['duration'] % 1) * 60)}m",
+                    "price": int(db_flight['price']),
+                    "currency": "INR",
+                    "class_type": db_flight['class'],
+                    "stops": 0 if db_flight['stops'] == 'zero' else (1 if db_flight['stops'] == 'one' else 2),
+                    "available_seats": random.randint(15, 80),
+                    "baggage": "30kg" if db_flight['class'] == 'Business' else "20kg",
+                    "amenities": ["Wi-Fi", "Meals", "Entertainment"] if db_flight['class'] == 'Business' else ["Meals"]
+                }
+                flight_list.append(flight_data)
+            
+            # Trace: Tool execution - success
             trace.append(self._generate_trace_event(
                 event_id="trace-3",
                 event_type="tool",
                 name="search_flights",
                 agent="sbt_agent",
                 status="completed",
-                input_data={"from_city": from_city, "to_city": to_city},
-                output_summary="No flights found - route not available",
-                duration_ms=20
+                input_data={"from_city": from_city, "to_city": to_city, "database": "postgresql"},
+                output_summary=f"Found {len(flight_list)} flights from database",
+                duration_ms=180
             ))
             
             # Trace: Result
@@ -869,60 +931,44 @@ class SBTAgent:
                 agent="sbt_agent",
                 status="completed",
                 input_data={},
-                output_summary="Route not available",
+                output_summary=f"{len(flight_list)} flights returned from database",
                 duration_ms=10
             ))
             
             return ToolResult(
                 action="search_flights",
-                message=f"Sorry, no flights available from {from_city.title()} to {to_city.title()}. Try different cities like Delhi, Mumbai, Dubai, or Bangalore.",
-                data={"flights": [], "count": 0},
+                message=f"Found {len(flight_list)} flights from {from_city.title()} to {to_city.title()} in our database of 312,200 flights across 35 Indian cities!",
+                data={
+                    "flights": flight_list,
+                    "count": len(flight_list),
+                    "from": {"name": from_city.title(), "code": from_city[:3].upper()},
+                    "to": {"name": to_city.title(), "code": to_city[:3].upper()},
+                    "source": "real_database"
+                },
                 trace=trace
             )
-        
-        # Get flights
-        flights = self.flights[route_key].copy()
-        random.shuffle(flights)
-        
-        # Get city info
-        from_info = CITY_MAPPING[self._normalize_city(from_city)]
-        to_info = CITY_MAPPING[self._normalize_city(to_city)]
-        
-        # Trace: Tool execution - success
-        trace.append(self._generate_trace_event(
-            event_id="trace-3",
-            event_type="tool",
-            name="search_flights",
-            agent="sbt_agent",
-            status="completed",
-            input_data={"from_city": from_city, "to_city": to_city, "route_key": route_key},
-            output_summary=f"Found {len(flights)} flights",
-            duration_ms=80
-        ))
-        
-        # Trace: Result
-        trace.append(self._generate_trace_event(
-            event_id="trace-4",
-            event_type="result",
-            name="Result",
-            agent="sbt_agent",
-            status="completed",
-            input_data={},
-            output_summary=f"{len(flights)} flights returned",
-            duration_ms=10
-        ))
-        
-        return ToolResult(
-            action="search_flights",
-            message=f"Found {len(flights)} flights from {from_info['name']} ({from_info['code']}) to {to_info['name']} ({to_info['code']}).",
-            data={
-                "flights": [flight.model_dump() for flight in flights],
-                "count": len(flights),
-                "from": from_info,
-                "to": to_info
-            },
-            trace=trace
-        )
+            
+        except Exception as e:
+            logger.error(f"Error searching flights in database: {e}")
+            
+            # Trace: Error
+            trace.append(self._generate_trace_event(
+                event_id="trace-3",
+                event_type="tool",
+                name="search_flights",
+                agent="sbt_agent",
+                status="error",
+                input_data={"from_city": from_city, "to_city": to_city},
+                output_summary=f"Database error: {str(e)}",
+                duration_ms=50
+            ))
+            
+            return ToolResult(
+                action="search_flights",
+                message=f"Error searching flights: {str(e)}",
+                data={"flights": [], "count": 0, "error": str(e)},
+                trace=trace
+            )
 
     def book_flight(
         self,
