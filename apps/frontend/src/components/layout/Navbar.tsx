@@ -1,6 +1,7 @@
 import React from 'react';
 import { Link, useLocation } from 'react-router-dom';
 import { Badge } from '../ui/Badge';
+import { LogoWithText } from '../ui/Logo';
 
 export const Navbar: React.FC = () => {
   const location = useLocation();
@@ -10,10 +11,8 @@ export const Navbar: React.FC = () => {
       <div className="mx-auto flex h-14 max-w-7xl items-center justify-between px-4 sm:px-6 lg:px-8">
         <div className="flex items-center space-x-6">
           <div className="flex items-center space-x-3">
-            <span className="text-lg font-bold tracking-tight text-white">
-              Travix AI
-            </span>
-            <Badge variant="info">Shell Ready</Badge>
+            <LogoWithText size="sm" />
+            <Badge variant="info">AI Powered</Badge>
           </div>
           
           <nav className="flex items-center space-x-4">

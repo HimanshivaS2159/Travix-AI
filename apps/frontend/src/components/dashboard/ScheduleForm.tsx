@@ -149,14 +149,14 @@ export function ScheduleForm({ onSubmit, loading = false }: ScheduleFormProps) {
   };
 
   return (
-    <div className="w-full bg-[#1e1e1e] rounded-lg border border-gray-700 p-6">
-      <h2 className="text-xl font-semibold text-white mb-6">Create Day-Wise Schedule</h2>
+    <div className="w-full bg-white rounded-lg border border-gray-200 shadow-sm p-6">
+      <h2 className="text-xl font-semibold text-gray-900 mb-6">Create Day-Wise Schedule</h2>
 
       <form onSubmit={handleSubmit} className="space-y-6">
         {/* Basic Info */}
         <div className="space-y-4">
           <div>
-            <label className="block text-sm font-medium text-gray-300 mb-2">
+            <label className="block text-sm font-medium text-gray-700 mb-2">
               Trip Name *
             </label>
             <Input
@@ -170,7 +170,7 @@ export function ScheduleForm({ onSubmit, loading = false }: ScheduleFormProps) {
 
           <div className="grid grid-cols-2 gap-4">
             <div>
-              <label className="block text-sm font-medium text-gray-300 mb-2">
+              <label className="block text-sm font-medium text-gray-700 mb-2">
                 Start Date *
               </label>
               <Input
@@ -181,7 +181,7 @@ export function ScheduleForm({ onSubmit, loading = false }: ScheduleFormProps) {
               />
             </div>
             <div>
-              <label className="block text-sm font-medium text-gray-300 mb-2">
+              <label className="block text-sm font-medium text-gray-700 mb-2">
                 End Date *
               </label>
               <Input
@@ -194,14 +194,14 @@ export function ScheduleForm({ onSubmit, loading = false }: ScheduleFormProps) {
           </div>
 
           <div>
-            <label className="block text-sm font-medium text-gray-300 mb-2">
+            <label className="block text-sm font-medium text-gray-700 mb-2">
               City *
             </label>
             <select
               value={formData.city}
               onChange={handleCityChange}
               disabled={loading}
-              className="w-full bg-[#2a2a2a] text-white border border-gray-600 rounded-lg px-3 py-2 focus:border-blue-500 outline-none transition-colors disabled:opacity-50"
+              className="w-full bg-white text-gray-900 border border-gray-300 rounded-lg px-3 py-2 focus:border-blue-500 focus:ring-2 focus:ring-blue-500/20 outline-none transition-all disabled:opacity-50 disabled:bg-gray-50"
             >
               <option>Delhi</option>
               <option>Mumbai</option>
@@ -215,12 +215,12 @@ export function ScheduleForm({ onSubmit, loading = false }: ScheduleFormProps) {
         {/* Daily Schedules */}
         <div className="space-y-4">
           <div className="flex items-center justify-between">
-            <h3 className="text-lg font-medium text-white">Daily Schedules</h3>
+            <h3 className="text-lg font-medium text-gray-900">Daily Schedules</h3>
             <button
               type="button"
               onClick={addDay}
               disabled={loading}
-              className="px-3 py-1 bg-blue-600 hover:bg-blue-700 text-white text-sm rounded-lg transition-colors disabled:opacity-50"
+              className="px-3 py-1 bg-blue-600 hover:bg-blue-700 text-white text-sm rounded-lg transition-colors disabled:opacity-50 shadow-sm"
             >
               + Add Day
             </button>
@@ -229,11 +229,11 @@ export function ScheduleForm({ onSubmit, loading = false }: ScheduleFormProps) {
           {formData.daily_schedules.map((schedule, dayIndex) => (
             <div
               key={dayIndex}
-              className="bg-[#2a2a2a] border border-gray-600 rounded-lg p-4 space-y-4"
+              className="bg-gray-50 border border-gray-200 rounded-lg p-4 space-y-4"
             >
               <div className="flex items-center justify-between">
                 <div className="flex-1">
-                  <label className="block text-sm font-medium text-gray-300 mb-1">
+                  <label className="block text-sm font-medium text-gray-700 mb-1">
                     Day Title
                   </label>
                   <Input
@@ -251,7 +251,7 @@ export function ScheduleForm({ onSubmit, loading = false }: ScheduleFormProps) {
                     type="button"
                     onClick={() => removeDay(dayIndex)}
                     disabled={loading}
-                    className="ml-3 px-3 py-2 bg-red-600/20 hover:bg-red-600/30 text-red-400 rounded-lg transition-colors disabled:opacity-50"
+                    className="ml-3 px-3 py-2 bg-red-50 hover:bg-red-100 text-red-600 rounded-lg transition-colors disabled:opacity-50 border border-red-200"
                   >
                     Remove
                   </button>
@@ -259,15 +259,15 @@ export function ScheduleForm({ onSubmit, loading = false }: ScheduleFormProps) {
               </div>
 
               {/* Schedule Items */}
-              <div className="space-y-3 pl-4 border-l-2 border-gray-600">
+              <div className="space-y-3 pl-4 border-l-2 border-blue-300">
                 {schedule.items.map((item, itemIndex) => (
                   <div
                     key={itemIndex}
-                    className="bg-[#1e1e1e] rounded-lg p-3 space-y-3"
+                    className="bg-white rounded-lg p-3 space-y-3 border border-gray-200 shadow-sm"
                   >
                     <div className="grid grid-cols-2 gap-3">
                       <div>
-                        <label className="block text-xs font-medium text-gray-400 mb-1">
+                        <label className="block text-xs font-medium text-gray-600 mb-1">
                           Time
                         </label>
                         <Input
@@ -285,7 +285,7 @@ export function ScheduleForm({ onSubmit, loading = false }: ScheduleFormProps) {
                         />
                       </div>
                       <div>
-                        <label className="block text-xs font-medium text-gray-400 mb-1">
+                        <label className="block text-xs font-medium text-gray-600 mb-1">
                           Duration
                         </label>
                         <Input
@@ -306,7 +306,7 @@ export function ScheduleForm({ onSubmit, loading = false }: ScheduleFormProps) {
                     </div>
 
                     <div>
-                      <label className="block text-xs font-medium text-gray-400 mb-1">
+                      <label className="block text-xs font-medium text-gray-600 mb-1">
                         Activity
                       </label>
                       <Input
@@ -326,7 +326,7 @@ export function ScheduleForm({ onSubmit, loading = false }: ScheduleFormProps) {
                     </div>
 
                     <div>
-                      <label className="block text-xs font-medium text-gray-400 mb-1">
+                      <label className="block text-xs font-medium text-gray-600 mb-1">
                         Location
                       </label>
                       <Input
@@ -346,7 +346,7 @@ export function ScheduleForm({ onSubmit, loading = false }: ScheduleFormProps) {
                     </div>
 
                     <div>
-                      <label className="block text-xs font-medium text-gray-400 mb-1">
+                      <label className="block text-xs font-medium text-gray-600 mb-1">
                         Notes
                       </label>
                       <textarea
@@ -361,7 +361,7 @@ export function ScheduleForm({ onSubmit, loading = false }: ScheduleFormProps) {
                         }
                         placeholder="Any additional notes"
                         disabled={loading}
-                        className="w-full bg-[#2a2a2a] text-white border border-gray-600 rounded-lg px-3 py-2 focus:border-blue-500 outline-none transition-colors disabled:opacity-50 text-xs"
+                        className="w-full bg-white text-gray-900 border border-gray-300 rounded-lg px-3 py-2 focus:border-blue-500 focus:ring-2 focus:ring-blue-500/20 outline-none transition-all disabled:opacity-50 disabled:bg-gray-50 text-xs"
                         rows={2}
                       />
                     </div>
@@ -371,7 +371,7 @@ export function ScheduleForm({ onSubmit, loading = false }: ScheduleFormProps) {
                         type="button"
                         onClick={() => removeScheduleItem(dayIndex, itemIndex)}
                         disabled={loading}
-                        className="w-full px-3 py-1 bg-red-600/20 hover:bg-red-600/30 text-red-400 text-xs rounded transition-colors disabled:opacity-50"
+                        className="w-full px-3 py-1 bg-red-50 hover:bg-red-100 text-red-600 text-xs rounded border border-red-200 transition-colors disabled:opacity-50"
                       >
                         Remove Item
                       </button>
@@ -383,7 +383,7 @@ export function ScheduleForm({ onSubmit, loading = false }: ScheduleFormProps) {
                   type="button"
                   onClick={() => addScheduleItem(dayIndex)}
                   disabled={loading}
-                  className="w-full px-3 py-2 bg-green-600/20 hover:bg-green-600/30 text-green-400 text-sm rounded-lg transition-colors disabled:opacity-50"
+                  className="w-full px-3 py-2 bg-green-50 hover:bg-green-100 text-green-700 text-sm rounded-lg border border-green-200 transition-colors disabled:opacity-50"
                 >
                   + Add Activity
                 </button>

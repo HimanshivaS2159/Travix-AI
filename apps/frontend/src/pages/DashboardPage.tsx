@@ -9,6 +9,7 @@ import { ShowSchedules } from '../components/dashboard/ShowSchedules';
 import { RebookingModal } from '../components/dashboard/RebookingModal';
 import { FlightBookingModal } from '../components/dashboard/FlightBookingModal';
 import { OrchestratorProvider, useOrchestratorContext } from '../contexts/OrchestratorContext';
+import { Logo } from '../components/ui/Logo';
 import type { Flight } from '../types';
 
 type ViewTab = 'trace' | 'flow' | 'result';
@@ -126,8 +127,8 @@ function DashboardContent() {
           <div className="flex items-center justify-between">
             <div className="flex items-center gap-3">
               <div className="flex items-center gap-2">
-                <div className="w-8 h-8 bg-gradient-to-br from-blue-500 via-purple-500 to-pink-500 rounded"></div>
-                <span className="text-white font-semibold text-lg">TRAVIX</span>
+                <Logo size="sm" />
+                <span className="text-white font-semibold text-lg bg-gradient-to-r from-blue-400 to-blue-600 bg-clip-text text-transparent">TRAVIX</span>
               </div>
               <span className="text-gray-400">/</span>
               <span className="text-gray-300">Admin</span>
