@@ -18,7 +18,7 @@ class Settings(BaseSettings):
     
     # Groq API Configuration
     groq_api_key: str = ""
-    groq_model: str = "llama-3.3-70b-versatile"
+    groq_model: str = "llama-3.1-8b-instant"
     
     # Database Configuration
     database_url: str = "postgresql://travix:travix_password@postgres:5432/travix_db"
@@ -28,6 +28,17 @@ class Settings(BaseSettings):
     
     # Agent Configuration
     orchestrator_system_prompt: str = ""
+    
+    # Email Configuration
+    email_smtp_host: str = "smtp.gmail.com"
+    email_smtp_port: int = 587
+    email_imap_host: str = "imap.gmail.com"
+    email_imap_port: int = 993
+    email_from_address: str = ""
+    email_from_password: str = ""
+    email_from_name: str = "Travix AI Assistant"
+    email_check_interval: int = 60
+    email_auto_reply: bool = True
 
     class Config:
         env_file = ".env"

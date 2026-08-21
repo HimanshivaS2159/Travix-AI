@@ -9,6 +9,7 @@ import { ExpenseForm } from './ExpenseForm';
 import { ShowExpenses } from './ShowExpenses';
 import { TripForm } from './TripForm';
 import { ShowTrips } from './ShowTrips';
+import { RevisingAgentView } from './RevisingAgentView';
 
 interface ResultViewProps {
   onSelectFlight?: (flight: Flight) => void;
@@ -131,6 +132,19 @@ export function ResultView({ onSelectFlight }: ResultViewProps) {
     );
   } else if (currentResult.action === 'trip_created') {
     return <TripCreatedView trip={currentResult.data?.trip} message={currentResult.message} />;
+  } else if (
+    currentResult.action === 'review_itinerary' ||
+    currentResult.action === 'review_booking' ||
+    currentResult.action === 'optimize_schedule' ||
+    currentResult.action === 'check_budget'
+  ) {
+    return (
+      <RevisingAgentView
+        action={currentResult.action}
+        data={currentResult.data}
+        message={currentResult.message}
+      />
+    );
   }
 
   return (

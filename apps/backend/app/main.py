@@ -1,6 +1,7 @@
 from fastapi import FastAPI
 from fastapi.middleware.cors import CORSMiddleware
 from .api.orchestrator import router as orchestrator_router
+from .api.email import router as email_router
 from .config import get_settings
 import logging
 
@@ -14,7 +15,7 @@ logger = logging.getLogger(__name__)
 app = FastAPI(
     title="Travix AI Backend",
     version="0.1.0",
-    description="AI-powered travel assistant with Groq API orchestrator"
+    description="AI-powered travel assistant with Groq API orchestrator and Email integration"
 )
 
 # Get settings
@@ -32,6 +33,7 @@ app.add_middleware(
 
 # Include routers
 app.include_router(orchestrator_router)
+app.include_router(email_router)
 
 
 @app.get("/health")
@@ -55,7 +57,12 @@ def root():
         "endpoints": {
             "health": "/health",
             "orchestrator_analyze": "/api/orchestrator/analyze",
+            "orchestrator_execute": "/api/orchestrator/execute",
             "agents_list": "/api/orchestrator/agents",
-            "agent_tools": "/api/orchestrator/agents/{agent_name}/tools"
+            "agent_tools": "/api/orchestrator/agents/{agent_name}/tools",
+            "email_send": "/api/email/send",
+            "email_check": "/api/email/check",
+            "email_process": "/api/email/process",
+            "email_status": "/api/email/status"
         }
     }
